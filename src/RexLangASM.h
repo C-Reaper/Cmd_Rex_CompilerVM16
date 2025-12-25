@@ -9,6 +9,7 @@
 #include "/home/codeleaded/System/Static/Library/Files.h"
 #include "/home/codeleaded/System/Static/Library/String.h"
 
+#include "/home/codeleaded/System/Static/Library/VM16.h"
 #include "RexLangDefines.h"
 
 
@@ -196,60 +197,30 @@ char RexLang_CompressStackType(RexLang* ll,TokenMap* tm,int start){
     }
     return 0;
 }
-
-CStr RexLang_TypeSelector(RexLang* ll,int size){
-    if(size==1) return CStr_Cpy(RexLang_DREF_8);
-    if(size==2) return CStr_Cpy(RexLang_DREF_16);
-    if(size==4) return CStr_Cpy(RexLang_DREF_32);
-    if(size==8) return CStr_Cpy(RexLang_DREF_64);
+CStr RexLang_TypeSelector_T(RexLang* ll,CStr typename){
+    int size = RexLang_Size(ll,typename);
+    if(size == sizeof(VM16_Byte))   return VM16_POST_ARCH_8;
+    if(size == sizeof(VM16_Imm))    return VM16_POST_ARCH_16;
     return NULL;
-}
-CStr RexLang_TypeSelector_T(RexLang* ll,CStr name){
-    if(RexLang_DrefType(ll,name))  return RexLang_TypeSelector(ll,RexLang_Bytes(ll)); 
-    else                            return RexLang_TypeSelector(ll,RexLang_Size(ll,name));
-}
-CStr RexLang_StackDir(RexLang* ll,int size,int stack){
-    CStr selector = RexLang_TypeSelector(ll,size);
-    CStr cstr = CStr_Format("%s[rsp + %d]",selector,stack);
-    CStr_Free(&selector);
-    return cstr;
-}
-CStr RexLang_StackAtS(RexLang* ll,int size,int stack){
-    CStr selector = RexLang_TypeSelector(ll,size);
-    CStr cstr = CStr_Format("%s[rsp + %d]",selector,ll->stack - stack);
-    CStr_Free(&selector);
-    return cstr;
-}
-CStr RexLang_StackAt(RexLang* ll,char* typename,int stack){
-    CStr selector = RexLang_TypeSelector_T(ll,typename);
-    CStr cstr = CStr_Format("%s[rsp + %d]",selector,ll->stack - stack);
-    CStr_Free(&selector);
-    return cstr;
-}
-CStr RexLang_StackAtNT(RexLang* ll,int stack){
-    CStr cstr = CStr_Format("[rsp + %d]",ll->stack - stack);
-    return cstr;
 }
 CStr RexLang_GetGlobal(RexLang* ll,CStr name){
     CStr realname = CStr_Format("g.%s",name);
     return realname;
 }
-CStr RexLang_GlobalAt(RexLang* ll,CStr name,char* typename){
-    CStr selector = RexLang_TypeSelector_T(ll,typename);
-    CStr realname = RexLang_GetGlobal(ll,name);
-    CStr ret = CStr_Format("%s[%s]",selector,realname);
-    CStr_Free(&realname);
-    CStr_Free(&selector);
-    return ret;
-}
-CStr RexLang_Location(RexLang* ll,char* name){
+CStr RexLang_Location(RexLang* ll,CStr reg,CStr name){
     Variable* v = Scope_FindVariable(&ll->ev.sc,name);
     if(v){
         RexLangVariable* sv = (RexLangVariable*)Variable_Data(v);
         if(v->range>0){
-            return RexLang_StackAt(ll,v->typename,sv->stack);
+            CStr typeselector = RexLang_TypeSelector_T(ll,v->typename);
+            RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t" RexLang_REG_SP,reg);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t%s\t%d",reg,ll->stack - sv->stack);
+            return reg;
         }else if(sv->global){
-            return RexLang_GlobalAt(ll,v->name,v->typename);
+            CStr realname = RexLang_GetGlobal(ll,name);
+            RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t%s",reg,realname);
+            CStr_Free(&realname);
+            return reg;
         }
     }
     return NULL;
@@ -316,13 +287,13 @@ CStr RexLang_BuildConstStr(RexLang* ll,CStr cstr){
     CVector_Push(&ll->constsstr,(CStr[]){ CStr_Cpy(name) });
     
     CStr cstr_value = RexLang_ConstStr(ll,cstr);
-    String_Appendf(&ll->data,"%s: db %s\n",name,cstr_value);
+    String_Appendf(&ll->data,"%s:\n" RexLang_INDENTATION "%s\n",name,cstr_value);
     CStr_Free(&cstr_value);
     return name;
 }
 CStr RexLang_BuildGlobal(RexLang* ll,CStr name,int size){
     CStr g_name = RexLang_GetGlobal(ll,name);
-    String_Appendf(&ll->bss,"%s: resb %d\n",g_name,size);
+    String_Appendf(&ll->bss,"%s:\n" RexLang_INDENTATION "#%d\n",g_name,size);
     return g_name;
 }
 
@@ -357,7 +328,7 @@ void RexLang_Variable_Build_Decl(RexLang* ll,CStr name,CStr type){
         RexLangVariable* sv = (RexLangVariable*)Variable_Data(v);
         sv->global = g_value;
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub rsp,%d",RexLang_Size(ll,type));
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t" RexLang_REG_SP "\t%d",RexLang_Size(ll,type));
     }
 }
 void RexLang_Variable_Build_DeclStack(RexLang* ll,CStr name,CStr type,int stacksize){
@@ -369,9 +340,11 @@ void RexLang_Variable_Build_DeclStack(RexLang* ll,CStr name,CStr type,int stacks
         RexLangVariable* sv = (RexLangVariable*)Variable_Data(v);
         sv->global = g_value;
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub rsp,%d",RexLang_Size(ll,type));
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub rsp,%d",stacksize);
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov QWORD[rsp + %d],rsp",stacksize);
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t" RexLang_REG_SP "\t%d",RexLang_Size(ll,type));
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t" RexLang_REG_SP "\t%d",stacksize);
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t" RexLang_REG_A "\t" RexLang_REG_SP "",stacksize);
+        RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t" RexLang_REG_A "\t%d",stacksize);
+        RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t" RexLang_REG_A "\t" RexLang_REG_SP "",stacksize);
     }
 }
 void RexLang_Variable_Build_Ref(RexLang* ll,CStr name,CStr type){
@@ -386,7 +359,7 @@ void RexLang_Variable_BuildRange_Decl(RexLang* ll,CStr name,CStr type,Range r){
         RexLangVariable* sv = (RexLangVariable*)Variable_Data(v);
         sv->global = g_value;
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub rsp,%d",RexLang_Size(ll,type));
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t" RexLang_REG_SP "\t%d",RexLang_Size(ll,type));
     }
 }
 void RexLang_Variable_Build_Ref_Decl(RexLang* ll,CStr name,CStr type){
@@ -398,7 +371,7 @@ void RexLang_Variable_Build_Ref_Decl(RexLang* ll,CStr name,CStr type){
         RexLangVariable* sv = (RexLangVariable*)Variable_Data(v);
         sv->global = g_value;
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub rsp,%d",RexLang_Size(ll,type));
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t" RexLang_REG_SP "\t%d",RexLang_Size(ll,type));
     }
 }
 void RexLang_Variable_Build_Use(RexLang* ll,CStr name,CStr type,int stack){
@@ -412,11 +385,11 @@ void RexLang_Variable_Destroy_Decl(RexLang* ll,CStr name){
     if(v->range>0){
         int size = RexLang_Size(ll,v->typename);
         if(size>0){
-            RexLang_Indentation_Appendf(ll,&ll->text,"add rsp,%d",size);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t" RexLang_REG_SP "\t%d",size);
             ll->stack -= size;
         }
         if(sv->sizeonstack > 0){
-            RexLang_Indentation_Appendf(ll,&ll->text,"add rsp,%d",sv->sizeonstack);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t" RexLang_REG_SP "\t%d",sv->sizeonstack);
             ll->stack -= sv->sizeonstack;
         }
     }
@@ -428,10 +401,10 @@ void RexLang_Variable_Destroy_Only(RexLang* ll,CStr name){
     if(v->range>0){
         int size = RexLang_Size(ll,v->typename);
         if(size>0){
-            RexLang_Indentation_Appendf(ll,&ll->text,"add rsp,%d",size);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t" RexLang_REG_SP "\t%d",size);
         }
         if(sv->sizeonstack > 0){
-            RexLang_Indentation_Appendf(ll,&ll->text,"add rsp,%d",sv->sizeonstack);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t" RexLang_REG_SP "\t%d",sv->sizeonstack);
         }
     }
 }
@@ -459,10 +432,10 @@ CStr RexLang_VariableType(RexLang* ll,Token* a){
         if(v_a) return RexLang_TypeOfDref(ll,v_a->typename);
     }
     if(a->tt==TOKEN_REXLANG_BOOLEAN)    return CStr_Cpy(BOOL_TYPE);
-    if(a->tt==TOKEN_NUMBER)              return CStr_Cpy(I64_TYPE);
+    if(a->tt==TOKEN_NUMBER)              return CStr_Cpy(I16_TYPE);
     if(a->tt==TOKEN_CONSTSTRING_DOUBLE)  return CStr_Cpy(STR_TYPE);
     if(a->tt==TOKEN_CONSTSTRING_SINGLE)  return CStr_Cpy(CHAR_TYPE);
-    if(a->tt==TOKEN_FLOAT)               return CStr_Cpy(F64_TYPE);
+    //if(a->tt==TOKEN_FLOAT)               return CStr_Cpy(F64_TYPE);
     if(a->tt==TOKEN_FUNCTIONPOINTER)     return CStr_Cpy(NULL_TYPE);
     if(a->tt==TOKEN_REXLANG_NULL)       return CStr_Cpy(NULL_TYPE);
     return NULL;
@@ -486,13 +459,6 @@ int RexLang_TypeRealSize(RexLang* ll,Token* a){
     int size = RexLang_Size(ll,type);
     CStr_Free(&type);
     return size;
-}
-char** RexLang_SelectRT(RexLang* ll,int size){
-    if(size==1) return RexLang_RT_8;
-    if(size==2) return RexLang_RT_16;
-    if(size==4) return RexLang_RT_32;
-    if(size==8) return RexLang_RT_64;
-    return NULL;
 }
 CStr RexLang_FunctionName(RexLang* ll,CStr name){
     String builder = String_Format("f.%s",name);
@@ -610,7 +576,7 @@ void RexLang_LogicCorrection(RexLang* ll,TokenMap* tm){
         int lp = RexLang_GetLogicPath(ll,ll->ev.sc.range);
         if(t->tt==TOKEN_REXLANG_ELIF || t->tt==TOKEN_REXLANG_ELSE){
             CStr log_label = RexLang_Logic(ll,1,RexLang_LOG,ll->ev.sc.range);
-            RexLang_Indentation_Appendf(ll,&ll->text,"jmp %s",log_label);
+            RexLang_Indentation_Appendf(ll,&ll->text,"jmp\t\t%s",log_label);
             CStr_Free(&log_label);
         }else{
             CStr log_label = RexLang_Logic(ll,1,RexLang_LOG,ll->ev.sc.range);
@@ -625,7 +591,7 @@ void RexLang_LogicCorrection(RexLang* ll,TokenMap* tm){
         int lp = RexLang_GetLogicPath(ll,ll->ev.sc.range);
         if(t->tt==TOKEN_REXLANG_ELIF || t->tt==TOKEN_REXLANG_ELSE){
             CStr log_label = RexLang_Logic(ll,1,RexLang_LOG,ll->ev.sc.range);
-            RexLang_Indentation_Appendf(ll,&ll->text,"jmp %s",log_label);
+            RexLang_Indentation_Appendf(ll,&ll->text,"jmp\t\t%s",log_label);
             CStr_Free(&log_label);
         }else{
             CStr log_label = RexLang_Logic(ll,1,RexLang_LOG,ll->ev.sc.range);
@@ -645,7 +611,7 @@ void RexLang_LogicCorrection(RexLang* ll,TokenMap* tm){
         int lp = RexLang_GetLogicPath(ll,ll->ev.sc.range);
         CStr start_label = RexLang_Logic(ll,0,RexLang_WHILE,ll->ev.sc.range);
         CStr end_label = RexLang_Logic(ll,1,RexLang_WHILE,ll->ev.sc.range);
-        RexLang_Indentation_Appendf(ll,&ll->text,"jmp %s",start_label);
+        RexLang_Indentation_Appendf(ll,&ll->text,"jmp\t\t%s",start_label);
         RexLang_Indentation_Appendf(ll,&ll->text,"%s:",end_label);
         CStr_Free(&end_label);
         CStr_Free(&start_label);
@@ -653,7 +619,7 @@ void RexLang_LogicCorrection(RexLang* ll,TokenMap* tm){
         int lp = RexLang_GetLogicPath(ll,ll->ev.sc.range);
         CStr start_label = RexLang_Logic(ll,0,RexLang_FOR,ll->ev.sc.range);
         CStr end_label = RexLang_Logic(ll,1,RexLang_FOR,ll->ev.sc.range);
-        RexLang_Indentation_Appendf(ll,&ll->text,"jmp %s",start_label);
+        RexLang_Indentation_Appendf(ll,&ll->text,"jmp\t\t%s",start_label);
         RexLang_Indentation_Appendf(ll,&ll->text,"%s:",end_label);
         CStr_Free(&end_label);
         CStr_Free(&start_label);
@@ -668,12 +634,7 @@ CStr RexLang_LogicCmp(RexLang* ll,CStr type){
 Boolean RexLang_TypeInt(CStr typename){
     return
     CStr_Cmp(typename,I8_TYPE) || CStr_Cmp(typename,I16_TYPE) ||
-    CStr_Cmp(typename,I32_TYPE) || CStr_Cmp(typename,I64_TYPE) ||
-    CStr_Cmp(typename,U8_TYPE) || CStr_Cmp(typename,U16_TYPE) ||
-    CStr_Cmp(typename,U32_TYPE) || CStr_Cmp(typename,U64_TYPE);
-}
-Boolean RexLang_TypeFloat(CStr typename){
-    return CStr_Cmp(typename,F32_TYPE) || CStr_Cmp(typename,F64_TYPE);
+    CStr_Cmp(typename,U8_TYPE) || CStr_Cmp(typename,U16_TYPE);
 }
 
 Number RexLang_Function_Add(Number a,Number b){
@@ -780,7 +741,7 @@ Token RexLang_Init(RexLang* ll,Token* op,Vector* args){
         if(v->range>0){
             if(size>0){
                 ll->stack += size;
-                RexLang_Indentation_Appendf(ll,&ll->text,"sub rsp,%d",size);
+                RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\trsp,%d",size);
             }
             *sv = RexLangVariable_New(ll->stack,0,1,ll);
         }else{
@@ -806,36 +767,6 @@ void RexLang_FromTo_DestroyOnly(RexLang* ll,Range start,Range end) {
     }
 }
 
-Double RexLang_GetFloat(RexLang* ll,CStr fstr){
-    return Double_Parse(fstr,0);
-}
-CStr RexLang_GetFloatStr(RexLang* ll,CStr fstr){
-    Double d = RexLang_GetFloat(ll,fstr);
-    CStr cstr = Number_Get(*((Number*)&d));
-    return cstr;
-}
-Token RexLang_GetFloatToken(RexLang* ll,CStr fstr){
-    return Token_Move(TOKEN_FLOAT,RexLang_GetFloatStr(ll,fstr));
-}
-
-CStr RexLang_FInstOf(RexLang* ll,Token* a,CStr inst){
-    if(a->tt==TOKEN_STRING){
-        Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
-        if(v){
-            if(RexLang_TypeFloat(v->typename)){
-                return CStr_Format("f%s",inst);
-            }else if(RexLang_TypeInt(v->typename)){
-                return CStr_Format("fi%s",inst);
-            }
-        }
-    }else if(a->tt==TOKEN_FLOAT){
-        return CStr_Format("f%s",inst);
-    }else if(a->tt==TOKEN_NUMBER){
-        return CStr_Format("fi%s",inst);
-    }
-    return NULL;
-}
-
 Boolean RexLang_Extract(RexLang* ll,Token* a,Number* n){
     if(a->tt==TOKEN_STRING){
         return False;
@@ -858,7 +789,6 @@ Boolean RexLang_ExtractBool(RexLang* ll,Token* a,Boolean* b){
         return False;
     }
 }
-
 Boolean RexLang_ErrorsInArg(RexLang* ll,Token* a){
     if(a->tt==TOKEN_NONE){
         Compiler_ErrorHandler(&ll->ev,"Errors -> Tokentype of %s is NONE!",a->str);
@@ -921,28 +851,24 @@ void RexLang_DrefIntoReg(RexLang* ll,Token* a,CStr reg){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
             if(RexLang_DrefType(ll,v->typename)){
-                CStr location = RexLang_Location(ll,a->str);
-                RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",reg,location);
+                CStr location = RexLang_Location(ll,reg,a->str);
                 CStr typename = CStr_Cpy(v->typename);
                 int drefs = RexLang_DrefTypeCount(ll,typename);
+                
                 for(int i = 0;i<drefs-1;i++){
-                    CStr typeselector = NULL;
-                    if(typename[CStr_Size(typename) - 1]=='&')  typeselector = CStr_Cpy(RexLang_DREF_64);
-                    else                                        typeselector = RexLang_TypeSelector_T(ll,typename);
-
-                    RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s[%s]",reg,typeselector,reg);
-                    CStr_Free(&typeselector);
+                    CStr typeselector = RexLang_TypeSelector_T(ll,typename);
+                    RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,reg,reg);
 
                     CStr newtypename = CStr_PopOff(typename);
                     CStr_Set(&typename,newtypename);
                     CStr_Free(&newtypename);
                 }
-                CStr_Free(&location);
+                CStr_Free(&typename);
             }else{
-                Compiler_ErrorHandler(&ll->ev,"IntoReg -> Error: %s is not a var!",a->str);
+                Compiler_ErrorHandler(&ll->ev,"IntoReg -> Error: %s is not a dref var!",a->str);
             }
         }else{
-            Compiler_ErrorHandler(&ll->ev,"DrefIntoReg -> Error: %s is not a dref var!",a->str);
+            Compiler_ErrorHandler(&ll->ev,"DrefIntoReg -> Error: %s is not a var!",a->str);
         }
     }
 }
@@ -950,61 +876,55 @@ void RexLang_IntoReg(RexLang* ll,Token* a,CStr reg){
     if(a->tt==TOKEN_STRING){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
-            CStr location = RexLang_Location(ll,a->str);
-        
             if(RexLang_DrefType(ll,v->typename)){
-                RexLang_DrefIntoReg(ll,a,RexLang_REG_10_64);
+                RexLang_DrefIntoReg(ll,a,RexLang_REG_D);
                 
                 CStr typename = RexLang_TypeOfDref(ll,v->typename);
                 CStr typeselector = RexLang_TypeSelector_T(ll,typename);
-                RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s[%s]",reg,typeselector,RexLang_REG_10_64);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,reg,RexLang_REG_D);
                 CStr_Free(&typename);
-                CStr_Free(&typeselector);
             }else{
-                RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",reg,location);
+                CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
+                CStr typeselector = RexLang_TypeSelector_T(ll,v->typename);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,reg,location);
             }
-            CStr_Free(&location);
         }else{
             Compiler_ErrorHandler(&ll->ev,"IntoReg -> Error: %s is not a var!",a->str);
         }
     }else if(a->tt==TOKEN_FLOAT){
-        CStr fstr = RexLang_GetFloatStr(ll,a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",reg,fstr);
-        CStr_Free(&fstr);
+        Compiler_ErrorHandler(&ll->ev,"IntoReg -> Error: %s is a float!",a->str);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
         Boolean b = Boolean_Parse(a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%d",reg,b);
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_8 "%s\t%d",reg,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",reg);
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t0",reg);
     }else if(a->tt==TOKEN_CONSTSTRING_SINGLE){
         Number val = 0;
         const int size = CStr_Size(a->str);
         for(int i = 0;i<size;i++){
             val += a->str[i] << (i * 8);
         }
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%d",reg,val);
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_16 "\t%s\t%d",reg,val);
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",reg,a->str);
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_16 "\t%s\t%s",reg,a->str);
     }
 }
 void RexLang_IntoSet(RexLang* ll,Token* a,CStr reg){
     if(a->tt==TOKEN_STRING){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
-            CStr location = RexLang_Location(ll,a->str);
-        
             if(RexLang_DrefType(ll,v->typename)){
-                RexLang_DrefIntoReg(ll,a,RexLang_REG_10_64);
+                RexLang_DrefIntoReg(ll,a,RexLang_REG_D);
                 
                 CStr typename = RexLang_TypeOfDref(ll,v->typename);
                 CStr typeselector = RexLang_TypeSelector_T(ll,typename);
-                RexLang_Indentation_Appendf(ll,&ll->text,"mov %s[%s],%s",typeselector,RexLang_REG_10_64,reg);
+                RexLang_Indentation_Appendf(ll,&ll->text,"st%s\t\t%s\t%s",typeselector,RexLang_REG_D,reg);
                 CStr_Free(&typename);
-                CStr_Free(&typeselector);
             }else{
-                RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",location,reg);
+                CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
+                CStr typeselector = RexLang_TypeSelector_T(ll,v->typename);
+                RexLang_Indentation_Appendf(ll,&ll->text,"st%s\t\t%s\t%s",typeselector,location,reg);
             }
-            CStr_Free(&location);
         }else{
             Compiler_ErrorHandler(&ll->ev,"IntoSet -> Error: %s is not a var!",a->str);
         }
@@ -1016,71 +936,88 @@ void RexLang_AtReg(RexLang* ll,Token* a,CStr reg,CStr inst){
     if(a->tt==TOKEN_STRING){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
-            CStr location = RexLang_Location(ll,a->str);
-            
             if(RexLang_DrefType(ll,v->typename)){
-                RexLang_DrefIntoReg(ll,a,RexLang_REG_10_64);
+                RexLang_DrefIntoReg(ll,a,RexLang_REG_D);
                 
                 CStr typename = RexLang_TypeOfDref(ll,v->typename);
                 CStr typeselector = RexLang_TypeSelector_T(ll,typename);
-                RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,%s[%s]",inst,reg,typeselector,RexLang_REG_10_64);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,RexLang_REG_D,RexLang_REG_D);
+                RexLang_Indentation_Appendf(ll,&ll->text,"%s%s\t\t%s\t%s",inst,typeselector,reg,RexLang_REG_D);
                 CStr_Free(&typename);
-                CStr_Free(&typeselector);
             }else{
-                RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,%s",inst,reg,location);
+                CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
+                CStr typeselector = RexLang_TypeSelector_T(ll,v->typename);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,location,location);
+                RexLang_Indentation_Appendf(ll,&ll->text,"%s%s\t\t%s\t%s",inst,typeselector,reg,location);
             }
-            CStr_Free(&location);
         }else{
             Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is not a var!",a->str);
         }
     }else if(a->tt==TOKEN_FLOAT){
-        CStr fstr = RexLang_GetFloatStr(ll,a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,%s",inst,reg,fstr);
-        CStr_Free(&fstr);
+        Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is a float!",a->str);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
         Boolean b = Boolean_Parse(a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,%d",inst,reg,b);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_8 "\t\t%s\t%d",inst,reg,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,0",inst,reg);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s\t\t%s\t0",inst,reg);
     }else if(a->tt==TOKEN_CONSTSTRING_SINGLE){
         Number val = 0;
         const int size = CStr_Size(a->str);
         for(int i = 0;i<size;i++){
             val += a->str[i] << (i * 8);
         }
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,%d",inst,reg,val);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%s\t%d",inst,reg,val);
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,%s",inst,reg,a->str);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%s\t%s",inst,reg,a->str);
     }
 }
-void RexLang_AtRegSingle(RexLang* ll,Token* a,CStr inst){//Always A ex: mul,div etc
+void RexLang_AddressReg(RexLang* ll,Token* a,CStr reg){
     if(a->tt==TOKEN_STRING){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
-            CStr location = RexLang_Location(ll,a->str);
-            
             if(RexLang_DrefType(ll,v->typename)){
-                RexLang_DrefIntoReg(ll,a,RexLang_REG_10_64);
+                RexLang_DrefIntoReg(ll,a,RexLang_REG_D);
+                RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t%s",reg,RexLang_REG_D);
+            }else{
+                CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
+                RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t%s",reg,location);
+            }
+        }else{
+            Compiler_ErrorHandler(&ll->ev,"AddressReg -> Error: %s is not a var!",a->str);
+        }
+    }else{
+        Compiler_ErrorHandler(&ll->ev,"AddressReg -> Error: %s is not a var but addressed!",a->str);
+    }
+}
+
+void RexLang_AtRegSingle(RexLang* ll,Token* a,CStr inst){
+    if(a->tt==TOKEN_STRING){
+        Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
+        if(v){
+            if(RexLang_DrefType(ll,v->typename)){
+                RexLang_DrefIntoReg(ll,a,RexLang_REG_D);
                 
                 CStr typename = RexLang_TypeOfDref(ll,v->typename);
                 CStr typeselector = RexLang_TypeSelector_T(ll,typename);
-                RexLang_Indentation_Appendf(ll,&ll->text,"%s %s[%s]",inst,typeselector,RexLang_REG_10_64);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,RexLang_REG_C,RexLang_REG_D);
+                RexLang_Indentation_Appendf(ll,&ll->text,"%s%s\t\t%s",inst,typeselector,RexLang_REG_C);
+                RexLang_Indentation_Appendf(ll,&ll->text,"st%s\t\t%s\t%s",typeselector,RexLang_REG_D,RexLang_REG_C);
                 CStr_Free(&typename);
-                CStr_Free(&typeselector);
             }else{
-                RexLang_Indentation_Appendf(ll,&ll->text,"%s %s",inst,location);
+                CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
+                CStr typeselector = RexLang_TypeSelector_T(ll,v->typename);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,RexLang_REG_C,location);
+                RexLang_Indentation_Appendf(ll,&ll->text,"%s%s\t\t%s",inst,typeselector,RexLang_REG_C);
+                RexLang_Indentation_Appendf(ll,&ll->text,"st%s\t\t%s\t%s",typeselector,location,RexLang_REG_C);
             }
-            CStr_Free(&location);
         }else{
             Compiler_ErrorHandler(&ll->ev,"AtRegSingle -> Error: %s is not a var!",a->str);
         }
     }else if(a->tt==TOKEN_FLOAT){
-        CStr fstr = RexLang_GetFloatStr(ll,a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s",inst,fstr);
-        CStr_Free(&fstr);
+        Compiler_ErrorHandler(&ll->ev,"AtRegSingle -> Error: %s is a float!",a->str);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
         Boolean b = Boolean_Parse(a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %d",inst,b);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_8 "\t\t%d",inst,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
         RexLang_Indentation_Appendf(ll,&ll->text,"%s 0",inst);
     }else if(a->tt==TOKEN_CONSTSTRING_SINGLE){
@@ -1089,32 +1026,34 @@ void RexLang_AtRegSingle(RexLang* ll,Token* a,CStr inst){//Always A ex: mul,div 
         for(int i = 0;i<size;i++){
             val += a->str[i] << (i * 8);
         }
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov %d",val);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%d",inst,val);
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s",inst,a->str);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%s",inst,a->str);
     }
 }
 void RexLang_AtSingle(RexLang* ll,CStr reg,CStr inst){//Always A ex: mul,div etc
-    RexLang_Indentation_Appendf(ll,&ll->text,"%s %s",inst,reg);
+    RexLang_Indentation_Appendf(ll,&ll->text,"%s\t\t%s",inst,reg);
 }
 void RexLang_AtSet(RexLang* ll,Token* a,CStr reg,CStr inst){
     if(a->tt==TOKEN_STRING){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
-            CStr location = RexLang_Location(ll,a->str);
-            
             if(RexLang_DrefType(ll,v->typename)){
-                RexLang_DrefIntoReg(ll,a,RexLang_REG_10_64);
+                RexLang_DrefIntoReg(ll,a,RexLang_REG_D);
                 
                 CStr typename = RexLang_TypeOfDref(ll,v->typename);
                 CStr typeselector = RexLang_TypeSelector_T(ll,typename);
-                RexLang_Indentation_Appendf(ll,&ll->text,"%s %s[%s],%s",inst,typeselector,RexLang_REG_10_64,reg);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,RexLang_REG_C,RexLang_REG_D);
+                RexLang_Indentation_Appendf(ll,&ll->text,"%s%s\t\t%s\t%s",inst,typeselector,RexLang_REG_C,reg);
+                RexLang_Indentation_Appendf(ll,&ll->text,"st%s\t\t%s\t%s",typeselector,RexLang_REG_D,RexLang_REG_C);
                 CStr_Free(&typename);
-                CStr_Free(&typeselector);
             }else{
-                RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,%s",inst,location,reg);
+                CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
+                CStr typeselector = RexLang_TypeSelector_T(ll,v->typename);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,RexLang_REG_C,location);
+                RexLang_Indentation_Appendf(ll,&ll->text,"%s%s\t\t%s\t%s",inst,typeselector,RexLang_REG_C,reg);
+                RexLang_Indentation_Appendf(ll,&ll->text,"st%s\t\t%s\t%s",typeselector,location,RexLang_REG_C);
             }
-            CStr_Free(&location);
         }else{
             Compiler_ErrorHandler(&ll->ev,"AtSet -> Error: %s is not a var!",a->str);
         }
@@ -1125,59 +1064,40 @@ void RexLang_AtSet(RexLang* ll,Token* a,CStr reg,CStr inst){
 void RexLang_CmpAtReg(RexLang* ll,Token* a,CStr reg){
     if(a->tt==TOKEN_STRING){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
-        CStr location = RexLang_Location(ll,a->str);
-        
-        if(RexLang_DrefType(ll,v->typename)){
-            RexLang_DrefIntoReg(ll,a,RexLang_REG_10_64);
+        if(v){
+            if(RexLang_DrefType(ll,v->typename)){
+                RexLang_DrefIntoReg(ll,a,RexLang_REG_D);
                 
-            CStr typename = RexLang_TypeOfDref(ll,v->typename);
-            CStr typeselector = RexLang_TypeSelector_T(ll,typename);
-            RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,%s[%s]",reg,typeselector,RexLang_REG_10_64);
-            CStr_Free(&typename);
-            CStr_Free(&typeselector);
+                CStr typename = RexLang_TypeOfDref(ll,v->typename);
+                CStr typeselector = RexLang_TypeSelector_T(ll,typename);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,RexLang_REG_D,RexLang_REG_D);
+                RexLang_Indentation_Appendf(ll,&ll->text,"sub%s\t\t%s\t%s",typeselector,reg,RexLang_REG_D);
+                CStr_Free(&typename);
+            }else{
+                CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
+                CStr typeselector = RexLang_TypeSelector_T(ll,v->typename);
+                RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,location,location);
+                RexLang_Indentation_Appendf(ll,&ll->text,"sub%s\t\t%s\t%s",typeselector,reg,location);
+            }
         }else{
-            RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,%s",reg,location);
+            Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is not a var!",a->str);
         }
-        CStr_Free(&location);
     }else if(a->tt==TOKEN_FLOAT){
-        CStr fstr = RexLang_GetFloatStr(ll,a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,%s",reg,fstr);
-        CStr_Free(&fstr);
+        Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is a float!",a->str);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
         Boolean b = Boolean_Parse(a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,%d",reg,b);
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub" VM16_POST_ARCH_8 "\t\t%s\t%d",reg,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
-        RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,0",reg);
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t%s\t0",reg);
     }else if(a->tt==TOKEN_CONSTSTRING_SINGLE){
         Number val = 0;
         const int size = CStr_Size(a->str);
         for(int i = 0;i<size;i++){
             val += a->str[i] << (i * 8);
         }
-        RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,%d",reg,val);
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub" VM16_POST_ARCH_16 "\t\t%s\t%d",reg,val);
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,%s",reg,a->str);
-    }
-}
-void RexLang_CmpAtSet(RexLang* ll,Token* a,CStr inst){
-    if(a->tt==TOKEN_STRING){
-        Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
-        CStr location = RexLang_Location(ll,a->str);
-        
-        if(RexLang_DrefType(ll,v->typename)){
-            RexLang_DrefIntoReg(ll,a,RexLang_REG_10_64);
-                
-            CStr typename = RexLang_TypeOfDref(ll,v->typename);
-            CStr typeselector = RexLang_TypeSelector_T(ll,typename);
-            RexLang_Indentation_Appendf(ll,&ll->text,"%s %s[%s]",inst,typeselector,RexLang_REG_10_64);
-            CStr_Free(&typename);
-            CStr_Free(&typeselector);
-        }else{
-            RexLang_Indentation_Appendf(ll,&ll->text,"%s %s",inst,location);
-        }
-        CStr_Free(&location);
-    }else{
-        Compiler_ErrorHandler(&ll->ev,"Set -> Error: %s is not a var but assigned!",a->str);
+        RexLang_Indentation_Appendf(ll,&ll->text,"sub" VM16_POST_ARCH_16 "\t\t%s\t%s",reg,a->str);
     }
 }
 
@@ -1191,11 +1111,8 @@ Token RexLang_ExecuteAss(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,C
         RexLang_AtSet(ll,a,b->str,instname);
         return Token_Cpy(a);
     }else if(b->tt==TOKEN_FLOAT){
-        CStr fstr = RexLang_GetFloatStr(ll,b->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",RexLang_REG_A_64,fstr);
-        RexLang_AtSet(ll,a,RexLang_REG_A_64,instname);
-        CStr_Free(&fstr);
-        return Token_Cpy(a);
+        Compiler_ErrorHandler(&ll->ev,"ExecuteAss -> Error: %s is a float!",b->str);
+        return Token_Null();
     }else if(b->tt==TOKEN_REXLANG_NULL){
         RexLang_AtSet(ll,a,"0",instname);
         return Token_Cpy(a);
@@ -1204,30 +1121,12 @@ Token RexLang_ExecuteAss(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,C
         int realsize_b = RexLang_TypeRealSize(ll,b);
         
         if(realsize_b>realsize_a)
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",RexLang_REG_A_64);
+            RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t0",RexLang_REG_A);
 
-        RexLang_IntoReg(ll,b,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_A]);
-        RexLang_AtSet(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A],instname);
+        RexLang_IntoReg(ll,b,RexLang_REG_A);
+        RexLang_AtSet(ll,a,RexLang_REG_A,instname);
         return Token_Cpy(a);
     }
-}
-Token RexLang_ExecuteAssA(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CStr instnameupper){
-    //Compiler_InfoHandler(&ll->ev,"%s: %s %s %s",instnameupper,a->str,op->str,b->str);
-    
-    if(RexLang_ErrorsInArg(ll,a)) return Token_Null();
-    if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
-
-    int realsize_a = RexLang_TypeRealSize(ll,a);
-    int realsize_b = RexLang_TypeRealSize(ll,b);
-        
-    if(realsize_b>realsize_a)
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",RexLang_REG_A_64);
-
-    RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-    RexLang_IntoReg(ll,b,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_B]);
-    RexLang_AtSingle(ll,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_B],instname);
-    RexLang_IntoSet(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-    return Token_Cpy(a);
 }
 Token RexLang_ExecuteAssSingle(RexLang* ll,Token* a,Token* op,CStr instname,CStr instnameupper){
     //Compiler_InfoHandler(&ll->ev,"%s: %s %s %s",instnameupper,a->str,op->str,b->str);
@@ -1259,11 +1158,11 @@ Token RexLang_Execute(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CStr
         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
         
         if(realsize_b>realsize_a)
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",RexLang_REG_A_64);
+            RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t0",RexLang_REG_A);
 
-        RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-        RexLang_AtReg(ll,b,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_A],instname);
-        RexLang_IntoSet(ll,&stack_t,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
+        RexLang_IntoReg(ll,a,RexLang_REG_A);
+        RexLang_AtReg(ll,b,RexLang_REG_A,instname);
+        RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
         return stack_t;
     }
 }
@@ -1286,10 +1185,10 @@ Token RexLang_ExecuteA(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CSt
             CStr_Free(&typename_a);
             Token stack_t = Token_Move(TOKEN_STRING,stack_name);
         
-            RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-            RexLang_IntoReg(ll,b,RexLang_REG_B_64);
-            RexLang_AtSingle(ll,RexLang_REG_B_64,instname);
-            RexLang_IntoSet(ll,&stack_t,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
+            RexLang_IntoReg(ll,a,RexLang_REG_A);
+            RexLang_IntoReg(ll,b,RexLang_REG_B);
+            RexLang_AtSingle(ll,RexLang_REG_B,instname);
+            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
             return stack_t;
         }else{
             CStr typename_a = RexLang_VariableType(ll,a);
@@ -1300,82 +1199,11 @@ Token RexLang_ExecuteA(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CSt
             CStr_Free(&typename_a);
             Token stack_t = Token_Move(TOKEN_STRING,stack_name);
         
-            RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
+            RexLang_IntoReg(ll,a,RexLang_REG_A);
             RexLang_AtRegSingle(ll,b,instname);
-            RexLang_IntoSet(ll,&stack_t,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
+            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
             return stack_t;
         }
-    }
-}
-Token RexLang_ExecuteAR(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CStr instnameupper,Number (*inst)(Number,Number)){
-    //Compiler_InfoHandler(&ll->ev,"%s: %s %s %s",instnameupper,a->str,op->str,b->str);
-    
-    if(RexLang_ErrorsInArg(ll,a)) return Token_Null();
-    if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
-
-    if(a->tt==TOKEN_NUMBER && b->tt==TOKEN_NUMBER){
-        char* resstr = Number_Get(inst(Number_Parse(a->str),Number_Parse(b->str)));
-        return Token_Move(TOKEN_NUMBER,resstr);
-    }else{
-        if(b->tt==TOKEN_NUMBER){
-            CStr typename_a = RexLang_VariableType(ll,a);
-            int realsize_a = RexLang_TypeRealSize(ll,a);
-        
-            CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
-            RexLang_Variable_Build_Decl(ll,stack_name,typename_a);
-            CStr_Free(&typename_a);
-            Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-        
-            RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-            RexLang_IntoReg(ll,b,RexLang_REG_B_64);
-            RexLang_AtSingle(ll,RexLang_REG_B_64,instname);
-            RexLang_IntoSet(ll,&stack_t,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_D]);
-            return stack_t;
-        }else{
-            CStr typename_a = RexLang_VariableType(ll,a);
-            int realsize_a = RexLang_TypeRealSize(ll,a);
-        
-            CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
-            RexLang_Variable_Build_Decl(ll,stack_name,typename_a);
-            CStr_Free(&typename_a);
-            Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-        
-            RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-            RexLang_AtRegSingle(ll,b,instname);
-            RexLang_IntoSet(ll,&stack_t,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_D]);
-            return stack_t;
-        }
-    }
-}
-Token RexLang_ExecuteAR2(RexLang* ll,Token* a,Token* b,int reg2,int reg2_size,Token* op,CStr instname,CStr instnameupper,Number (*inst)(Number,Number)){
-    //Compiler_InfoHandler(&ll->ev,"%s: %s %s %s",instnameupper,a->str,op->str,b->str);
-    
-    if(RexLang_ErrorsInArg(ll,a)) return Token_Null();
-    if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
-
-    if(reg2 < 0 || reg2_size < 0) return Token_Null();
-
-    if(a->tt==TOKEN_NUMBER && b->tt==TOKEN_NUMBER){
-        char* resstr = Number_Get(inst(Number_Parse(a->str),Number_Parse(b->str)));
-        return Token_Move(TOKEN_NUMBER,resstr);
-    }else{
-        CStr typename_a = RexLang_VariableType(ll,a);
-        int realsize_a = RexLang_TypeRealSize(ll,a);
-        int realsize_b = RexLang_TypeRealSize(ll,b);
-        
-        CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
-        RexLang_Variable_Build_Decl(ll,stack_name,typename_a);
-        CStr_Free(&typename_a);
-        Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-        
-        if(realsize_b>realsize_a)
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",RexLang_REG_A_64);
-
-        RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-        RexLang_IntoReg(ll,b,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_C]);
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s,%s",instname,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A],RexLang_SelectRT(ll,reg2_size)[RexLang_REG_C]);
-        RexLang_IntoSet(ll,&stack_t,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-        return stack_t;
     }
 }
 Token RexLang_ExecuteSingle(RexLang* ll,Token* a,Token* op,CStr instname,CStr instnameupper,Number (*inst)(Number)){
@@ -1395,36 +1223,10 @@ Token RexLang_ExecuteSingle(RexLang* ll,Token* a,Token* op,CStr instname,CStr in
         CStr_Free(&typename_a);
         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
 
-        RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-        RexLang_AtSingle(ll,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A],instname);
-        RexLang_IntoSet(ll,&stack_t,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
+        RexLang_IntoReg(ll,a,RexLang_REG_A);
+        RexLang_AtSingle(ll,RexLang_REG_A,instname);
+        RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
         
-        return stack_t;
-    }
-}
-Token RexLang_ExecuteCmp(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CStr instnameupper,Boolean (*inst)(Number,Number)){
-    //Compiler_InfoHandler(&ll->ev,"%s: %s %s %s",instnameupper,a->str,op->str,b->str);
-    
-    if(RexLang_ErrorsInArg(ll,a)) return Token_Null();
-    if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
-
-    if(a->tt==TOKEN_NUMBER && b->tt==TOKEN_NUMBER){
-        char* resstr = Boolean_Get(inst(Number_Parse(a->str),Number_Parse(b->str)));
-        return Token_Move(TOKEN_REXLANG_BOOLEAN,resstr);
-    }else{
-        int realsize_a = RexLang_TypeRealSize(ll,a);
-        int realsize_b = RexLang_TypeRealSize(ll,b);
-        
-        CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
-        RexLang_Variable_Build_Decl(ll,stack_name,BOOL_TYPE);
-        Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-        
-        if(realsize_b>realsize_a)
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",RexLang_REG_A_64);
-
-        RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-        RexLang_CmpAtReg(ll,b,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_A]);
-        RexLang_CmpAtSet(ll,&stack_t,instname);
         return stack_t;
     }
 }
@@ -1446,17 +1248,17 @@ Token RexLang_ExecuteJmp(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,C
         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
         
         if(realsize_b>realsize_a)
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",RexLang_REG_A_64);
+            RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t0",RexLang_REG_A);
 
-        RexLang_IntoReg(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-        RexLang_CmpAtReg(ll,b,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_A]);
+        RexLang_IntoReg(ll,a,RexLang_REG_A);
+        RexLang_CmpAtReg(ll,b,RexLang_REG_A);
         
         CStr label_true = RexLang_LogicCmp(ll,RexLang_LOG_TRUE);
         CStr label_end = RexLang_LogicCmp(ll,RexLang_LOG_END);
 
-        RexLang_Indentation_Appendf(ll,&ll->text,"%s %s",instname,label_true);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s\t\t%s",instname,label_true);
         RexLang_IntoSet(ll,&stack_t,"0");
-        RexLang_Indentation_Appendf(ll,&ll->text,"jmp %s",label_end);
+        RexLang_Indentation_Appendf(ll,&ll->text,"jmp\t\t%s",label_end);
         RexLang_Indentation_Appendf(ll,&ll->text,"%s:",label_true);
         RexLang_IntoSet(ll,&stack_t,"1");
         RexLang_Indentation_Appendf(ll,&ll->text,"%s:",label_end);
@@ -1466,8 +1268,6 @@ Token RexLang_ExecuteJmp(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,C
         return stack_t;
     }
 }
-
-
 
 Token Int_Int_Handler_Cast(RexLang* ll,Token* op,Vector* args,CStr type){
     Token* a = (Token*)Vector_Get(args,0);
@@ -1484,7 +1284,7 @@ Token Int_Int_Handler_Cast(RexLang* ll,Token* op,Vector* args,CStr type){
         RexLang_ExecuteAss(ll,&stack_t,a,(Token[]){ Token_Move(TOKEN_REXLANG_ASS,NULL) },"mov","ASS");
         return stack_t;
     }else{
-        Environment_ErrorHandler(&ll->ev,"Cast(f64 -> i64): Error -> %s is from no possible type!",a->str);
+        Environment_ErrorHandler(&ll->ev,"Cast: Error -> %s is from no possible type!",a->str);
         return Token_Null();
     }
 }

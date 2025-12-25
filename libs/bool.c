@@ -1,18 +1,18 @@
 #if defined __linux__
 #include "/home/codeleaded/System/Static/Library/AlxCallStack.h"
 #include "/home/codeleaded/System/Static/Library/AlxExternFunctions.h"
-#include "/home/codeleaded/System/Static/Library/RexLang.h"
-#include "/home/codeleaded/System/Static/Library/RexLangASM.h"
+#include "../src/RexLang.h"
+#include "../src/RexLangASM.h"
 #elif defined _WINE
 #include "/home/codeleaded/System/Static/Library/AlxCallStack.h"
 #include "/home/codeleaded/System/Static/Library/AlxExternFunctions.h"
-#include "/home/codeleaded/System/Static/Library/RexLang.h"
-#include "/home/codeleaded/System/Static/Library/RexLangASM.h"
+#include "../src/RexLang.h"
+#include "../src/RexLangASM.h"
 #elif defined _WIN32
 #include "F:/home/codeleaded/System/Static/Library/AlxCallStack.h"
 #include "F:/home/codeleaded/System/Static/Library/AlxExternFunctions.h"
-#include "F:/home/codeleaded/System/Static/Library/RexLang.h"
-#include "F:/home/codeleaded/System/Static/Library/RexLangASM.h"
+#include "../src/RexLang.h"
+#include "../src/RexLangASM.h"
 #endif
 
 /*
@@ -57,25 +57,7 @@ end:
 Token Bool_Bool_Handler_Ass(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-
-    //printf("[Bool]: ASS: %s = %s\n",a->str,b->str);
-
-    if(b->tt==TOKEN_NUMBER){
-        RexLang_IntoSet(ll,a,b->str);
-    }else if(b->tt==TOKEN_REXLANG_BOOLEAN){
-        CStr value = Number_Get(Boolean_Parse(b->str));
-        RexLang_IntoSet(ll,a,value);
-        CStr_Free(&value);
-    }else if(b->tt==TOKEN_STRING){
-        int realsize_a = RexLang_TypeRealSize(ll,a);
-        int realsize_b = RexLang_TypeRealSize(ll,b);
-        RexLang_IntoReg(ll,b,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_A]);
-        RexLang_IntoSet(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
-    }else{
-        printf("[Bool]: Ass: Error -> %s has no bool/i64 type!\n",b->str);
-        return Token_Null();
-    }
-    return Token_Cpy(a);
+    return RexLang_ExecuteAss(ll,a,b,op,"mov","ASS");
 }
 Token Bool_Bool_Handler_Lnd(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
@@ -95,13 +77,13 @@ Token Bool_Bool_Handler_Equ(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"sete","EQU",RexLang_Function_Equ);
-    return RexLang_ExecuteJmp(ll,a,b,op,"je","EQU",RexLang_Function_Equ);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jz","EQU",RexLang_Function_Equ);
 }
 Token Bool_Bool_Handler_Neq(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setne","NEQ",RexLang_Function_Neq);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jne","NEQ",RexLang_Function_Neq);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jnz","NEQ",RexLang_Function_Neq);
 }
 
 Token Bool_Handler_Adr(RexLang* ll,Token* op,Vector* args){
@@ -116,22 +98,8 @@ Token Bool_Handler_Adr(RexLang* ll,Token* op,Vector* args){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-        
-        if(RexLang_DrefType(ll,v->typename)){
-            CStr type = CStr_Cpy(v->typename);
-            type[CStr_Size(type) - 1] = '*';
-            RexLang_Variable_Build_Decl(ll,stack_name,type);
-            CStr_Free(&type);
-
-            RexLang_AtReg(ll,a,RexLang_REG_A_64,"mov");
-            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A_64);
-        }else{
-            RexLang_Variable_Build_Decl(ll,stack_name,BOOL_TYPE"*");
-
-            RexLang_AtReg(ll,a,RexLang_REG_A_64,"lea");
-            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A_64);
-        }
-
+        RexLang_AddressReg(ll,a,RexLang_REG_A);
+        RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
         return stack_t;
     }else{
         Environment_ErrorHandler(&ll->ev,"Adr: Error -> %s has no address!",a->str);
@@ -163,13 +131,12 @@ Token Bool_Null_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     String_Free(&ret);
     return Token_Move(TOKEN_CONSTSTRING_DOUBLE,out);
 }
-
 Token Bool_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
 
     if(op->str==NULL) return Bool_Null_Handler_Cast(ll,op,args);
-    if(CStr_Cmp(op->str,I8_TYPE) || CStr_Cmp(op->str,I16_TYPE) || CStr_Cmp(op->str,I32_TYPE) || CStr_Cmp(op->str,I64_TYPE) ||
-       CStr_Cmp(op->str,U8_TYPE) || CStr_Cmp(op->str,U16_TYPE) || CStr_Cmp(op->str,U32_TYPE) || CStr_Cmp(op->str,U64_TYPE))
+    if(CStr_Cmp(op->str,I8_TYPE) || CStr_Cmp(op->str,I16_TYPE) ||
+       CStr_Cmp(op->str,U8_TYPE) || CStr_Cmp(op->str,U16_TYPE))
         return Int_Int_Handler_Cast(ll,op,args,op->str);
     return Token_Null();
 }

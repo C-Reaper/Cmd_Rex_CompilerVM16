@@ -3,7 +3,7 @@
 CC = gcc
 CFLAGS = -O0 -mavx2 -std=gnu17
 INCLUDES = -Isrc
-LDFLAGS = -lm
+LDFLAGS = -lm -lX11 -lpng -ljpeg
 
 SRC_DIR = src
 BUILD_DIR = build
@@ -43,10 +43,8 @@ $(BIN_DIR)/%.so: $(LIB_DIR)/%.c
 	$(CC) $(CFLAGS) -g -fPIC -o $@ $< -shared $(LDFLAGS)
 
 comp:
-	nasm -f elf64 -g -F dwarf ./asm/Main.asm -o ./build/Output.o
-	ld -m elf_x86_64 -no-pie ./build/Output.o -o ./build/Output
-#gdb ./build/Output
-	./build/Output; echo $$?
+	$(CC) $(CFLAGS) $(INCLUDES) $(SRC_DIR)/VM16.c -o $(BUILD_DIR)/VM16 $(LDFLAGS) 
+	$(BUILD_DIR)/VM16
 
 do: clean all exe
 

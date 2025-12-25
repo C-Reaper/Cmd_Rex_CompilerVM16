@@ -1,7 +1,7 @@
 #include "/home/codeleaded/System/Static/Library/AlxCallStack.h"
 #include "/home/codeleaded/System/Static/Library/AlxExternFunctions.h"
-#include "/home/codeleaded/System/Static/Library/RexLang.h"
-#include "/home/codeleaded/System/Static/Library/RexLangASM.h"
+#include "../src/RexLang.h"
+#include "../src/RexLangASM.h"
 
 Token U8_U8_Handler_Ass(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
@@ -22,13 +22,12 @@ Token U8_U8_Handler_Asu(RexLang* ll,Token* op,Vector* args){
 Token U8_U8_Handler_Asm(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_ExecuteAssA(ll,a,b,op,"mul","ASM");
+    return RexLang_ExecuteAss(ll,a,b,op,"imul","ASM");
 }
 Token U8_U8_Handler_Asv(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",RexLang_REG_D_64);
-    return RexLang_ExecuteAssA(ll,a,b,op,"div","ASV");
+    return RexLang_ExecuteAss(ll,a,b,op,"idiv","ASV");
 }
 
 Token U8_U8_Handler_Add(RexLang* ll,Token* op,Vector* args){
@@ -44,20 +43,18 @@ Token U8_U8_Handler_Sub(RexLang* ll,Token* op,Vector* args){
 Token U8_U8_Handler_Mul(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_ExecuteA(ll,a,b,op,"mul","IMUL",RexLang_Function_Mul);
+    return RexLang_Execute(ll,a,b,op,"imul","IMUL",RexLang_Function_Mul);
 }
 Token U8_U8_Handler_Div(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,0",RexLang_REG_D_64);
-    return RexLang_ExecuteA(ll,a,b,op,"div","DIV",RexLang_Function_Div);
+    return RexLang_Execute(ll,a,b,op,"idiv","IDIV",RexLang_Function_Div);
 }
 
 Token U8_U8_Handler_Mod(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    RexLang_Indentation_Appendf(ll,&ll->text,"mov rdx,0");
-    return RexLang_ExecuteAR(ll,a,b,op,"div","MOD",RexLang_Function_Mod);
+    return RexLang_Execute(ll,a,b,op,"imod","IMOD",RexLang_Function_Mod);
 }
 
 Token U8_Handler_Neg(RexLang* ll,Token* op,Vector* args){
@@ -96,37 +93,37 @@ Token U8_U8_Handler_Equ(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"sete","EQU",RexLang_Function_Equ);
-    return RexLang_ExecuteJmp(ll,a,b,op,"je","EQU",RexLang_Function_Equ);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jz","EQU",RexLang_Function_Equ);
 }
 Token U8_U8_Handler_Neq(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setne","NEQ",RexLang_Function_Neq);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jne","NEQ",RexLang_Function_Neq);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jnz","NEQ",RexLang_Function_Neq);
 }
 Token U8_U8_Handler_Les(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setl","LES",RexLang_Function_Les);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jl","LES",RexLang_Function_Les);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jn","LES",RexLang_Function_Les);
 }
 Token U8_U8_Handler_Grt(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setg","GRT",RexLang_Function_Grt);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jg","GRT",RexLang_Function_Grt);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jp","GRT",RexLang_Function_Grt);
 }
 Token U8_U8_Handler_Leq(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setle","LEQ",RexLang_Function_Leq);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jle","LEQ",RexLang_Function_Leq);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jzn","LEQ",RexLang_Function_Leq);
 }
 Token U8_U8_Handler_Grq(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setge","GRQ",RexLang_Function_Grq);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jge","GRQ",RexLang_Function_Grq);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jzp","GRQ",RexLang_Function_Grq);
 }
 
 Token U8_Handler_Adr(RexLang* ll,Token* op,Vector* args){
@@ -141,21 +138,8 @@ Token U8_Handler_Adr(RexLang* ll,Token* op,Vector* args){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-        
-        if(RexLang_DrefType(ll,v->typename)){
-            CStr type = CStr_Cpy(v->typename);
-            type[CStr_Size(type) - 1] = '*';
-            RexLang_Variable_Build_Decl(ll,stack_name,type);
-            CStr_Free(&type);
-
-            RexLang_AtReg(ll,a,RexLang_REG_A_64,"mov");
-            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A_64);
-        }else{
-            RexLang_Variable_Build_Decl(ll,stack_name,U16_TYPE"*");
-            RexLang_AtReg(ll,a,RexLang_REG_A_64,"lea");
-            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A_64);
-        }
-
+        RexLang_AddressReg(ll,a,RexLang_REG_A);
+        RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
         return stack_t;
     }else{
         Environment_ErrorHandler(&ll->ev,"Adr: Error -> %s has no address!",a->str);
@@ -166,7 +150,7 @@ Token U8_Handler_Adr(RexLang* ll,Token* op,Vector* args){
 Token U8_Null_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
 
-    //printf("[F64]: CAST: %s\n",a->str);
+    //printf("[U8]: CAST: %s\n",a->str);
 
     String ret = String_New();
 
@@ -190,9 +174,10 @@ Token U8_Null_Handler_Cast(RexLang* ll,Token* op,Vector* args){
 Token U8_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
 
-    if(op->str==NULL)                   return U8_Null_Handler_Cast(ll,op,args);
-    if(CStr_Cmp(op->str,I8_TYPE) || CStr_Cmp(op->str,I16_TYPE) || CStr_Cmp(op->str,I32_TYPE) || CStr_Cmp(op->str,I64_TYPE) ||
-       CStr_Cmp(op->str,U8_TYPE) || CStr_Cmp(op->str,U16_TYPE) || CStr_Cmp(op->str,U32_TYPE) || CStr_Cmp(op->str,U64_TYPE) ||
+    if(op->str==NULL)
+        return U8_Null_Handler_Cast(ll,op,args);
+    if(CStr_Cmp(op->str,U8_TYPE) || CStr_Cmp(op->str,I16_TYPE) ||
+       CStr_Cmp(op->str,U8_TYPE) || CStr_Cmp(op->str,U16_TYPE) ||
        RexLang_PointerType(ll,op->str))
         return Int_Int_Handler_Cast(ll,op,args,op->str);
     return Token_Null();
@@ -216,94 +201,6 @@ void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vec
                 OperatorDefiner_New(TOKEN_INIT,(Token(*)(void*,Token*,Vector*))RexLang_Init),
                 OperatorDefiner_New(TOKEN_REXLANG_SIZE,(Token(*)(void*,Token*,Vector*))U8_Handler_Size),
                 //OperatorDefiner_New(TOKEN_DESTROY,NULL),
-                OPERATORDEFINER_END
-            })),
-            OperatorInterater_Make((CStr[]){ U8_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
-                OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Ass),
-                OperatorDefiner_New(TOKEN_REXLANG_ASD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asd),
-                OperatorDefiner_New(TOKEN_REXLANG_ASU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asu),
-                OperatorDefiner_New(TOKEN_REXLANG_ASM,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asm),
-                OperatorDefiner_New(TOKEN_REXLANG_ASV,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asv),
-                OperatorDefiner_New(TOKEN_REXLANG_ADD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Add),
-                OperatorDefiner_New(TOKEN_REXLANG_SUB,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Sub),
-                OperatorDefiner_New(TOKEN_REXLANG_MUL,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Mul),
-                OperatorDefiner_New(TOKEN_REXLANG_DIV,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Div),
-                OperatorDefiner_New(TOKEN_REXLANG_MOD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Mod),
-                OperatorDefiner_New(TOKEN_REXLANG_AND,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_And),
-                OperatorDefiner_New(TOKEN_REXLANG_OR,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Or),
-                OperatorDefiner_New(TOKEN_REXLANG_XOR,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Xor),
-                OperatorDefiner_New(TOKEN_REXLANG_EQU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Equ),
-                OperatorDefiner_New(TOKEN_REXLANG_NEQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Neq),
-                OperatorDefiner_New(TOKEN_REXLANG_LES,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Les),
-                OperatorDefiner_New(TOKEN_REXLANG_GRT,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grt),
-                OperatorDefiner_New(TOKEN_REXLANG_LEQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Leq),
-                OperatorDefiner_New(TOKEN_REXLANG_GRQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grq),
-                OPERATORDEFINER_END
-            })),
-            OperatorInterater_Make((CStr[]){ U16_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
-                OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Ass),
-                OperatorDefiner_New(TOKEN_REXLANG_ASD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asd),
-                OperatorDefiner_New(TOKEN_REXLANG_ASU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asu),
-                OperatorDefiner_New(TOKEN_REXLANG_ASM,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asm),
-                OperatorDefiner_New(TOKEN_REXLANG_ASV,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asv),
-                OperatorDefiner_New(TOKEN_REXLANG_ADD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Add),
-                OperatorDefiner_New(TOKEN_REXLANG_SUB,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Sub),
-                OperatorDefiner_New(TOKEN_REXLANG_MUL,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Mul),
-                OperatorDefiner_New(TOKEN_REXLANG_DIV,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Div),
-                OperatorDefiner_New(TOKEN_REXLANG_MOD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Mod),
-                OperatorDefiner_New(TOKEN_REXLANG_AND,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_And),
-                OperatorDefiner_New(TOKEN_REXLANG_OR,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Or),
-                OperatorDefiner_New(TOKEN_REXLANG_XOR,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Xor),
-                OperatorDefiner_New(TOKEN_REXLANG_EQU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Equ),
-                OperatorDefiner_New(TOKEN_REXLANG_NEQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Neq),
-                OperatorDefiner_New(TOKEN_REXLANG_LES,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Les),
-                OperatorDefiner_New(TOKEN_REXLANG_GRT,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grt),
-                OperatorDefiner_New(TOKEN_REXLANG_LEQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Leq),
-                OperatorDefiner_New(TOKEN_REXLANG_GRQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grq),
-                OPERATORDEFINER_END
-            })),
-            OperatorInterater_Make((CStr[]){ U32_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
-                OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Ass),
-                OperatorDefiner_New(TOKEN_REXLANG_ASD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asd),
-                OperatorDefiner_New(TOKEN_REXLANG_ASU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asu),
-                OperatorDefiner_New(TOKEN_REXLANG_ASM,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asm),
-                OperatorDefiner_New(TOKEN_REXLANG_ASV,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asv),
-                OperatorDefiner_New(TOKEN_REXLANG_ADD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Add),
-                OperatorDefiner_New(TOKEN_REXLANG_SUB,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Sub),
-                OperatorDefiner_New(TOKEN_REXLANG_MUL,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Mul),
-                OperatorDefiner_New(TOKEN_REXLANG_DIV,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Div),
-                OperatorDefiner_New(TOKEN_REXLANG_MOD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Mod),
-                OperatorDefiner_New(TOKEN_REXLANG_AND,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_And),
-                OperatorDefiner_New(TOKEN_REXLANG_OR,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Or),
-                OperatorDefiner_New(TOKEN_REXLANG_XOR,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Xor),
-                OperatorDefiner_New(TOKEN_REXLANG_EQU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Equ),
-                OperatorDefiner_New(TOKEN_REXLANG_NEQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Neq),
-                OperatorDefiner_New(TOKEN_REXLANG_LES,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Les),
-                OperatorDefiner_New(TOKEN_REXLANG_GRT,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grt),
-                OperatorDefiner_New(TOKEN_REXLANG_LEQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Leq),
-                OperatorDefiner_New(TOKEN_REXLANG_GRQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grq),
-                OPERATORDEFINER_END
-            })),
-            OperatorInterater_Make((CStr[]){ U64_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
-                OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Ass),
-                OperatorDefiner_New(TOKEN_REXLANG_ASD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asd),
-                OperatorDefiner_New(TOKEN_REXLANG_ASU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asu),
-                OperatorDefiner_New(TOKEN_REXLANG_ASM,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asm),
-                OperatorDefiner_New(TOKEN_REXLANG_ASV,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asv),
-                OperatorDefiner_New(TOKEN_REXLANG_ADD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Add),
-                OperatorDefiner_New(TOKEN_REXLANG_SUB,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Sub),
-                OperatorDefiner_New(TOKEN_REXLANG_MUL,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Mul),
-                OperatorDefiner_New(TOKEN_REXLANG_DIV,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Div),
-                OperatorDefiner_New(TOKEN_REXLANG_MOD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Mod),
-                OperatorDefiner_New(TOKEN_REXLANG_AND,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_And),
-                OperatorDefiner_New(TOKEN_REXLANG_OR,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Or),
-                OperatorDefiner_New(TOKEN_REXLANG_XOR,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Xor),
-                OperatorDefiner_New(TOKEN_REXLANG_EQU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Equ),
-                OperatorDefiner_New(TOKEN_REXLANG_NEQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Neq),
-                OperatorDefiner_New(TOKEN_REXLANG_LES,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Les),
-                OperatorDefiner_New(TOKEN_REXLANG_GRT,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grt),
-                OperatorDefiner_New(TOKEN_REXLANG_LEQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Leq),
-                OperatorDefiner_New(TOKEN_REXLANG_GRQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grq),
                 OPERATORDEFINER_END
             })),
             OperatorInterater_Make((CStr[]){ I8_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
@@ -350,7 +247,7 @@ void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vec
                 OperatorDefiner_New(TOKEN_REXLANG_GRQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grq),
                 OPERATORDEFINER_END
             })),
-            OperatorInterater_Make((CStr[]){ I32_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
+            OperatorInterater_Make((CStr[]){ U8_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
                 OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Ass),
                 OperatorDefiner_New(TOKEN_REXLANG_ASD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asd),
                 OperatorDefiner_New(TOKEN_REXLANG_ASU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asu),
@@ -372,7 +269,7 @@ void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vec
                 OperatorDefiner_New(TOKEN_REXLANG_GRQ,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Grq),
                 OPERATORDEFINER_END
             })),
-            OperatorInterater_Make((CStr[]){ I64_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
+            OperatorInterater_Make((CStr[]){ U16_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
                 OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Ass),
                 OperatorDefiner_New(TOKEN_REXLANG_ASD,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asd),
                 OperatorDefiner_New(TOKEN_REXLANG_ASU,(Token(*)(void*,Token*,Vector*))U8_U8_Handler_Asu),

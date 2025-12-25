@@ -1,7 +1,7 @@
 #include "/home/codeleaded/System/Static/Library/AlxCallStack.h"
 #include "/home/codeleaded/System/Static/Library/AlxExternFunctions.h"
-#include "/home/codeleaded/System/Static/Library/RexLang.h"
-#include "/home/codeleaded/System/Static/Library/RexLangASM.h"
+#include "../src/RexLang.h"
+#include "../src/RexLangASM.h"
 
 Token Pointer_Pointer_Handler_Ass(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
@@ -24,8 +24,8 @@ Token Pointer_Pointer_Handler_Ass(RexLang* ll,Token* op,Vector* args){
     }else if(b->tt==TOKEN_STRING){
         int realsize_a = RexLang_TypeRealSize(ll,a);
         int realsize_b = RexLang_TypeRealSize(ll,b);
-        RexLang_IntoReg(ll,b,RexLang_SelectRT(ll,realsize_b)[RexLang_REG_A]);
-        RexLang_IntoSet(ll,a,RexLang_SelectRT(ll,realsize_a)[RexLang_REG_A]);
+        RexLang_IntoReg(ll,b,RexLang_REG_A);
+        RexLang_IntoSet(ll,a,RexLang_REG_A);
     }else{
         Environment_ErrorHandler(&ll->ev,"Ass: Error -> %s has no pointer type!",b->str);
         return Token_Null();
@@ -47,37 +47,37 @@ Token Pointer_Pointer_Handler_Equ(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"sete","EQU",RexLang_Function_Equ);
-    return RexLang_ExecuteJmp(ll,a,b,op,"je","EQU",RexLang_Function_Equ);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jz","EQU",RexLang_Function_Equ);
 }
 Token Pointer_Pointer_Handler_Neq(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setne","NEQ",RexLang_Function_Neq);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jne","NEQ",RexLang_Function_Neq);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jnz","NEQ",RexLang_Function_Neq);
 }
 Token Pointer_Pointer_Handler_Les(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setl","LES",RexLang_Function_Les);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jl","LES",RexLang_Function_Les);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jn","LES",RexLang_Function_Les);
 }
 Token Pointer_Pointer_Handler_Grt(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setg","GRT",RexLang_Function_Grt);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jg","GRT",RexLang_Function_Grt);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jp","GRT",RexLang_Function_Grt);
 }
 Token Pointer_Pointer_Handler_Leq(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setle","LEQ",RexLang_Function_Leq);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jle","LEQ",RexLang_Function_Leq);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jzn","LEQ",RexLang_Function_Leq);
 }
 Token Pointer_Pointer_Handler_Grq(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     //return RexLang_ExecuteCmp(ll,a,b,op,"setge","GRQ",RexLang_Function_Grq);
-    return RexLang_ExecuteJmp(ll,a,b,op,"jge","GRQ",RexLang_Function_Grq);
+    return RexLang_ExecuteJmp(ll,a,b,op,"jzp","GRQ",RexLang_Function_Grq);
 }
 
 Token Pointer_Handler_Adr(RexLang* ll,Token* op,Vector* args){
@@ -91,24 +91,8 @@ Token Pointer_Handler_Adr(RexLang* ll,Token* op,Vector* args){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-        
-        if(RexLang_DrefType(ll,v->typename)){
-            CStr type = CStr_Cpy(v->typename);
-            type[CStr_Size(type) - 1] = '*';
-            RexLang_Variable_Build_Decl(ll,stack_name,type);
-            CStr_Free(&type);
-
-            RexLang_AtReg(ll,a,RexLang_REG_A_64,"mov");
-            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A_64);
-        }else{
-            CStr type = CStr_Concat(v->typename,"*");
-            RexLang_Variable_Build_Decl(ll,stack_name,type);
-            CStr_Free(&type);
-
-            RexLang_AtReg(ll,a,RexLang_REG_A_64,"lea");
-            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A_64);
-        }
-        
+        RexLang_AddressReg(ll,a,RexLang_REG_A);
+        RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
         return stack_t;
     }else{
         Environment_ErrorHandler(&ll->ev,"Adr: Error -> %s has no address!",a->str);
@@ -130,15 +114,10 @@ Token Pointer_Handler_Drf(RexLang* ll,Token* op,Vector* args){
             CStr_Free(&type);
             
             Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-            CStr location_a = RexLang_Location(ll,a->str);
-            CStr location_s = RexLang_Location(ll,stack_name);
-
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",RexLang_REG_A_64,location_a);
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s[%s]",RexLang_REG_A_64,RexLang_DREF_64,RexLang_REG_A_64);
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",location_s,RexLang_REG_A_64);
-
-            CStr_Free(&location_a);
-            CStr_Free(&location_s);
+            CStr location_a = RexLang_Location(ll,RexLang_REG_D,a->str);
+            CStr location_s = RexLang_Location(ll,RexLang_REG_D,a->str);
+            RexLang_Indentation_Appendf(ll,&ll->text,"ld %s\t%s",RexLang_REG_A,location_a);
+            RexLang_Indentation_Appendf(ll,&ll->text,"st %s\t%s",location_s,RexLang_REG_A);
             return stack_t;
         }else{
             CStr type = CStr_Cpy(v->typename);
@@ -147,12 +126,11 @@ Token Pointer_Handler_Drf(RexLang* ll,Token* op,Vector* args){
             CStr_Free(&type);
             
             Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-            CStr location_a = RexLang_Location(ll,a->str);
-            CStr location_s = RexLang_Location(ll,stack_name);
-
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",RexLang_REG_A_64,location_a);
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",location_s,RexLang_REG_A_64);
-
+            
+            CStr location_a = RexLang_Location(ll,RexLang_REG_D,a->str);
+            CStr location_s = RexLang_Location(ll,RexLang_REG_D,stack_name);
+            RexLang_Indentation_Appendf(ll,&ll->text,"ld %s\t%s",RexLang_REG_A,location_a);
+            RexLang_Indentation_Appendf(ll,&ll->text,"st %s\t%s",location_s,RexLang_REG_A);
             CStr_Free(&location_a);
             CStr_Free(&location_s);
             return stack_t;
@@ -193,12 +171,12 @@ Token Pointer_Handler_Arw(RexLang* ll,Token* op,Vector* args){
                             CStr_Free(&type);
 
                             Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-                            CStr location_a = RexLang_Location(ll,a->str);
-                            CStr location_s = RexLang_Location(ll,stack_name);
+                            CStr location_a = RexLang_Location(ll,RexLang_REG_D,a->str);
+                            CStr location_s = RexLang_Location(ll,RexLang_REG_D,stack_name);
 
-                            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",RexLang_REG_A_64,location_a);
-                            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",location_s,RexLang_REG_A_64);
-                            RexLang_Indentation_Appendf(ll,&ll->text,"add %s,%d",location_s,offset);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"ld %s\t%s",RexLang_REG_A,location_a);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"add %s\t%d",RexLang_REG_A,offset);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"st %s\t%s",location_s,RexLang_REG_A);
 
                             CStr_Free(&location_a);
                             CStr_Free(&location_s);
@@ -208,13 +186,13 @@ Token Pointer_Handler_Arw(RexLang* ll,Token* op,Vector* args){
                             CStr_Free(&type);
 
                             Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-                            CStr location_a = RexLang_Location(ll,a->str);
-                            CStr location_s = RexLang_Location(ll,stack_name);
+                            CStr location_a = RexLang_Location(ll,RexLang_REG_D,a->str);
+                            CStr location_s = RexLang_Location(ll,RexLang_REG_D,stack_name);
 
-                            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",RexLang_REG_A_64,location_a);
-                            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s[%s]",RexLang_REG_A_64,RexLang_DREF_64,RexLang_REG_A_64);
-                            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",location_s,RexLang_REG_A_64);
-                            RexLang_Indentation_Appendf(ll,&ll->text,"add %s,%d",location_s,offset);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"ld %s\t%s",RexLang_REG_A,location_a);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"ld %s\t%s",RexLang_REG_A,RexLang_REG_A);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"add %s\t%d",RexLang_REG_A,offset);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"st %s\t%s",location_s,RexLang_REG_A);
 
                             CStr_Free(&location_a);
                             CStr_Free(&location_s);
@@ -289,8 +267,8 @@ Token Pointer_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
 
     if(op->str==NULL) return Pointer_Null_Handler_Cast(ll,op,args);
-    if(CStr_Cmp(op->str,I8_TYPE) || CStr_Cmp(op->str,I16_TYPE) || CStr_Cmp(op->str,I32_TYPE) || CStr_Cmp(op->str,I64_TYPE) ||
-       CStr_Cmp(op->str,U8_TYPE) || CStr_Cmp(op->str,U16_TYPE) || CStr_Cmp(op->str,U32_TYPE) || CStr_Cmp(op->str,U64_TYPE) ||
+    if(CStr_Cmp(op->str,I8_TYPE) || CStr_Cmp(op->str,I16_TYPE) ||
+       CStr_Cmp(op->str,U8_TYPE) || CStr_Cmp(op->str,U16_TYPE) ||
        RexLang_PointerType(ll,op->str))
         return Int_Int_Handler_Cast(ll,op,args,op->str);
     return Token_Null();
@@ -325,7 +303,7 @@ void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vec
                 OperatorDefiner_New(TOKEN_REXLANG_GRQ,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Grq),
                 OPERATORDEFINER_END
             })),
-            OperatorInterater_Make((CStr[]){ I32_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
+            OperatorInterater_Make((CStr[]){ I8_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
                 OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Ass),
                 OperatorDefiner_New(TOKEN_REXLANG_ADD,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Add),
                 OperatorDefiner_New(TOKEN_REXLANG_SUB,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Sub),
@@ -338,7 +316,7 @@ void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vec
                 OperatorDefiner_New(TOKEN_REXLANG_SUBS,(Token(*)(void*,Token*,Vector*))Pointer_I64_Handler_Subs),
                 OPERATORDEFINER_END
             })),
-            OperatorInterater_Make((CStr[]){ I64_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
+            OperatorInterater_Make((CStr[]){ I16_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
                 OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Ass),
                 OperatorDefiner_New(TOKEN_REXLANG_ADD,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Add),
                 OperatorDefiner_New(TOKEN_REXLANG_SUB,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Sub),
@@ -351,7 +329,7 @@ void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vec
                 OperatorDefiner_New(TOKEN_REXLANG_SUBS,(Token(*)(void*,Token*,Vector*))Pointer_I64_Handler_Subs),
                 OPERATORDEFINER_END
             })),
-            OperatorInterater_Make((CStr[]){ U32_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
+            OperatorInterater_Make((CStr[]){ U8_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
                 OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Ass),
                 OperatorDefiner_New(TOKEN_REXLANG_ADD,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Add),
                 OperatorDefiner_New(TOKEN_REXLANG_SUB,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Sub),
@@ -364,7 +342,7 @@ void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vec
                 OperatorDefiner_New(TOKEN_REXLANG_SUBS,(Token(*)(void*,Token*,Vector*))Pointer_I64_Handler_Subs),
                 OPERATORDEFINER_END
             })),
-            OperatorInterater_Make((CStr[]){ U64_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
+            OperatorInterater_Make((CStr[]){ U16_TYPE,NULL },OperatorDefineMap_Make((OperatorDefiner[]){
                 OperatorDefiner_New(TOKEN_REXLANG_ASS,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Ass),
                 OperatorDefiner_New(TOKEN_REXLANG_ADD,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Add),
                 OperatorDefiner_New(TOKEN_REXLANG_SUB,(Token(*)(void*,Token*,Vector*))Pointer_Pointer_Handler_Sub),

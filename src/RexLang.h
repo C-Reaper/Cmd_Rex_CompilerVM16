@@ -12,7 +12,6 @@
 
 #include "RexLangDefines.h"
 #include "RexLangASM.h"
-#include "RexLangASMF.h"
 
 
 Boolean RexLang_Compress(RexLang* ll,TokenMap* tm);
@@ -283,7 +282,7 @@ Boolean RexLang_Compress_function(RexLang* ll,TokenMap* tm){
 
             TokenMap rettypem = TokenMap_SubToToken(tm,TOKEN_PARENTHESES_L);
             TT_Iter it_pub = TokenMap_Find(&rettypem,TOKEN_REXLANG_PUB);
-            Boolean bpub = it_pub>=0;
+            Boolean bpub = it_pub>=0 ? RexLang_ACCESS_PUB : RexLang_ACCESS_NONE;
             TokenMap_Free(&rettypem);
 
             Vector_Push(&params,(Member[]){ MEMBER_END });
@@ -564,7 +563,7 @@ Boolean RexLang_If(RexLang* ll,TokenMap* tm){
                 Vector_Add(tm,(Token[]){ Compiler_SetterToken(&ll->ev) },1);
 
                 Boolean ret = Compiler_ShutingYard(&ll->ev,tm);
-                RexLang_IntoReg(ll,&btok,RexLang_REG_A_L8);
+                RexLang_IntoReg(ll,&btok,RexLang_REG_A);
                 Scope_DestroyVariable(&ll->ev.sc,btok.str);
                 Token_Free(&btok);
 
@@ -572,8 +571,8 @@ Boolean RexLang_If(RexLang* ll,TokenMap* tm){
 
                 CStr nextlabel = RexLang_Logic(ll,0,RexLang_IF,ll->ev.sc.range);
                 CStr otherlabel = RexLang_Logic(ll,1,RexLang_IF,ll->ev.sc.range);
-                RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,0",RexLang_REG_A_L8);
-                RexLang_Indentation_Appendf(ll,&ll->text,"je %s",otherlabel);
+                RexLang_Indentation_Appendf(ll,&ll->text,"sub %s,0",RexLang_REG_A);
+                RexLang_Indentation_Appendf(ll,&ll->text,"jz %s",otherlabel);
                 RexLang_Indentation_Appendf(ll,&ll->text,"%s:",nextlabel);
                 CStr_Free(&otherlabel);
                 CStr_Free(&nextlabel);
@@ -617,7 +616,7 @@ Boolean RexLang_Elif(RexLang* ll,TokenMap* tm){
                 Vector_Add(tm,(Token[]){ Compiler_SetterToken(&ll->ev) },1);
 
                 Boolean ret = Compiler_ShutingYard(&ll->ev,tm);
-                RexLang_IntoReg(ll,&btok,RexLang_REG_A_L8);
+                RexLang_IntoReg(ll,&btok,RexLang_REG_A);
                 Scope_DestroyVariable(&ll->ev.sc,btok.str);
                 Token_Free(&btok);
 
@@ -625,8 +624,8 @@ Boolean RexLang_Elif(RexLang* ll,TokenMap* tm){
 
                 CStr nextlabel = RexLang_Logic(ll,0,RexLang_ELIF,ll->ev.sc.range);
                 CStr otherlabel = RexLang_Logic(ll,1,RexLang_ELIF,ll->ev.sc.range);
-                RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,0",RexLang_REG_A_L8);
-                RexLang_Indentation_Appendf(ll,&ll->text,"je %s",otherlabel);
+                RexLang_Indentation_Appendf(ll,&ll->text,"sub %s,0",RexLang_REG_A);
+                RexLang_Indentation_Appendf(ll,&ll->text,"jz %s",otherlabel);
                 RexLang_Indentation_Appendf(ll,&ll->text,"%s:",nextlabel);
                 CStr_Free(&otherlabel);
                 CStr_Free(&nextlabel);
@@ -711,12 +710,12 @@ Boolean RexLang_While(RexLang* ll,TokenMap* tm){
                 Vector_Add(tm,(Token[]){ Compiler_SetterToken(&ll->ev) },1);
 
                 Boolean ret = Compiler_ShutingYard(&ll->ev,tm);
-                RexLang_IntoReg(ll,&btok,RexLang_REG_A_L8);
+                RexLang_IntoReg(ll,&btok,RexLang_REG_A);
                 Scope_DestroyVariable(&ll->ev.sc,btok.str);
                 Token_Free(&btok);
 
-                RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,0",RexLang_REG_A_L8);
-                RexLang_Indentation_Appendf(ll,&ll->text,"je %s",otherlabel);
+                RexLang_Indentation_Appendf(ll,&ll->text,"sub %s,0",RexLang_REG_A);
+                RexLang_Indentation_Appendf(ll,&ll->text,"jz %s",otherlabel);
                 CStr_Free(&otherlabel);
                 CStr_Free(&nextlabel);
 
@@ -776,12 +775,12 @@ Boolean RexLang_For(RexLang* ll,TokenMap* tm){
                     Vector_Add(&statement_1,(Token[]){ Compiler_SetterToken(&ll->ev) },1);
 
                     ret = Compiler_ShutingYard(&ll->ev,&statement_1);
-                    RexLang_IntoReg(ll,&btok,RexLang_REG_A_L8);
+                    RexLang_IntoReg(ll,&btok,RexLang_REG_A);
                     Scope_DestroyVariable(&ll->ev.sc,btok.str);
                     Token_Free(&btok); 
 
-                    RexLang_Indentation_Appendf(ll,&ll->text,"cmp %s,0",RexLang_REG_A_L8);
-                    RexLang_Indentation_Appendf(ll,&ll->text,"je %s",otherlabel);
+                    RexLang_Indentation_Appendf(ll,&ll->text,"sub %s,0",RexLang_REG_A);
+                    RexLang_Indentation_Appendf(ll,&ll->text,"jz %s",otherlabel);
                 }
                 TokenMap_Free(&statement_1);
                 
@@ -918,7 +917,8 @@ Boolean RexLang_Function(RexLang* ll,TokenMap* tm){
         RexLang_Indentation_To(ll,RexLang_INDENTATION_FUNCTION);
         
         CStr fname = RexLang_FunctionName(ll,tfunc->str);
-        String_Appendf(&ll->text,"%s:\n",fname);
+        if(f->access & RexLang_ACCESS_GLOBAL)   String_Appendf(&ll->text,"global %s:\n",fname);
+        else                                    String_Appendf(&ll->text,"%s:\n",fname);
         CStr_Free(&fname);
 
         CallPosition cp = CallPosition_New_N(TOKEN_FUNCTIONDECL,ll->ev.iter,tfunc->str);
@@ -953,11 +953,11 @@ Boolean RexLang_Return(RexLang* ll,TokenMap* tm){
     /*Function* f = Compiler_FunctionIn(&ll->ev);
     if(f && f->params.size>0){
         CStr retaddress = RexLang_StackDir(ll,8,0);
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov rax,%s",retaddress);
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\trax\t%s",retaddress);
         CStr_Free(&retaddress);
-        RexLang_Indentation_Appendf(ll,&ll->text,"add rsp,%d",RexLang_Bytes(ll));
+        RexLang_Indentation_Appendf(ll,&ll->text,"add\t\trsp\t%d",RexLang_Bytes(ll));
         Scope_Range_DestroyOnly(&ll->ev.sc,1);
-        RexLang_Indentation_Appendf(ll,&ll->text,"push rax");
+        RexLang_Indentation_Appendf(ll,&ll->text,"push\trax");
     }*/
     
     //ll->stack += RexLang_Bytes(ll);//Return Address
@@ -1026,7 +1026,7 @@ Boolean RexLang_Continue(RexLang* ll,TokenMap* tm){
 
                 CStr typecstr = cp->type == TOKEN_REXLANG_WHILE ? RexLang_WHILE : RexLang_FOR;
                 CStr end_label = RexLang_Logic(ll,0,typecstr,cp->range - 1);
-                RexLang_Indentation_Appendf(ll,&ll->text,"jmp %s",end_label);
+                RexLang_Indentation_Appendf(ll,&ll->text,"jmp\t%s",end_label);
                 CStr_Free(&end_label);
                 return False;
             }
@@ -1046,7 +1046,7 @@ Boolean RexLang_Break(RexLang* ll,TokenMap* tm){
 
                 CStr typecstr = cp->type == TOKEN_REXLANG_WHILE ? RexLang_WHILE : RexLang_FOR;
                 CStr end_label = RexLang_Logic(ll,1,typecstr,cp->range - 1);
-                RexLang_Indentation_Appendf(ll,&ll->text,"jmp %s",end_label);
+                RexLang_Indentation_Appendf(ll,&ll->text,"jmp\t%s",end_label);
                 CStr_Free(&end_label);
                 return False;
             }
@@ -1062,7 +1062,22 @@ Boolean RexLang_Assembly(RexLang* ll,TokenMap* tm){
     CStr indent = RexLang_Indentation_CStr(ll);
     String_Append(&ll->text,indent);
     CStr_Free(&indent);
-    
+    int pulled = 3;
+
+    for(int i = 1;i<tm->size;i++){
+        Token* t = (Token*)Vector_Get(tm,i);
+
+        if(t->tt==TOKEN_STRING){
+            if(pulled == 0){
+                Compiler_ErrorHandler(&ll->ev,"asm: assembly keyword can't handle more then 4 args: %s!",t->str);
+                return False;
+            }
+            RexLang_IntoReg(ll,t,RexLang_RT[pulled]);
+            pulled--;
+        }
+    }    
+
+    pulled = 3;
     for(int i = 1;i<tm->size;i++){
         Token* t = (Token*)Vector_Get(tm,i);
 
@@ -1070,9 +1085,8 @@ Boolean RexLang_Assembly(RexLang* ll,TokenMap* tm){
         else if(t->tt==TOKEN_NUMBER)        String_Append(&ll->text,t->str);
         else if(t->tt==TOKEN_FLOAT)         String_Append(&ll->text,t->str);
         else if(t->tt==TOKEN_STRING){
-            CStr location = RexLang_Location(ll,t->str);
-            String_Append(&ll->text,location);
-            CStr_Free(&location);
+            String_Append(&ll->text,RexLang_RT[pulled]);
+            pulled--;
         }else{
             Compiler_ErrorHandler(&ll->ev,"asm: assembly keyword can't handle: %s!",t->str);
         }
@@ -1185,12 +1199,11 @@ void RexLang_Function_Handler(RexLang* ll,Token* t,Function* f){
     if(t->tt==TOKEN_FUNCTION){
         if(f->pos>=0){
             CStr functionname = RexLang_FunctionName(ll,f->name);
-            RexLang_Indentation_Appendf(ll,&ll->text,"call %s",functionname);
+            RexLang_Indentation_Appendf(ll,&ll->text,"call\t%s",functionname);
             CStr_Free(&functionname);
         }else{
-            CStr location = RexLang_Location(ll,f->name);
-            RexLang_Indentation_Appendf(ll,&ll->text,"call %s",location);
-            CStr_Free(&location);
+            RexLang_IntoReg(ll,(Token[]){ Token_Move(TOKEN_STRING,f->name) },RexLang_REG_D);
+            RexLang_Indentation_Appendf(ll,&ll->text,"call\t%s",RexLang_REG_D);
         }
     }else{
         Compiler_ErrorHandler(&ll->ev,"Function: %s doesn't exist!",t->str);
@@ -1479,8 +1492,8 @@ RexLang RexLang_New(char* dllpath,char* src,char* output,char bits) {
         ),
         Scope_Make(
             (StdConstType[]){
-                StdConstType_New(TOKEN_NUMBER,I64_TYPE),
-                StdConstType_New(TOKEN_FLOAT,F64_TYPE),
+                StdConstType_New(TOKEN_NUMBER,I16_TYPE),
+                //StdConstType_New(TOKEN_FLOAT,F64_TYPE),
                 StdConstType_New(TOKEN_REXLANG_BOOLEAN,BOOL_TYPE),
                 StdConstType_New(TOKEN_CONSTSTRING_DOUBLE,STR_TYPE),
                 StdConstType_New(TOKEN_CONSTSTRING_SINGLE,CHAR_TYPE),
@@ -1602,6 +1615,8 @@ RexLang RexLang_New(char* dllpath,char* src,char* output,char bits) {
 
     Vector_Push(&ll.ev.epm,(ExternPackage[]){ ExternPackage_Make(ll.dllpath,VOID_TYPE,"Ex_Packer",  (CStr[]){ VOID_TYPE,    NULL },&ll.ev.sc) });
     Vector_Push(&ll.ev.epm,(ExternPackage[]){ ExternPackage_Make(ll.dllpath,BOOL_TYPE,"Ex_Packer",  (CStr[]){ BOOL_TYPE,    NULL },&ll.ev.sc) });
+    Vector_Push(&ll.ev.epm,(ExternPackage[]){ ExternPackage_Make(ll.dllpath,I8_TYPE,  "Ex_Packer",  (CStr[]){ I8_TYPE,      NULL },&ll.ev.sc) });
+    Vector_Push(&ll.ev.epm,(ExternPackage[]){ ExternPackage_Make(ll.dllpath,I16_TYPE, "Ex_Packer",  (CStr[]){ I16_TYPE,     NULL },&ll.ev.sc) });
     Vector_Push(&ll.ev.epm,(ExternPackage[]){ ExternPackage_Make(ll.dllpath,U8_TYPE,  "Ex_Packer",  (CStr[]){ U8_TYPE,      NULL },&ll.ev.sc) });
     Vector_Push(&ll.ev.epm,(ExternPackage[]){ ExternPackage_Make(ll.dllpath,U16_TYPE, "Ex_Packer",  (CStr[]){ U16_TYPE,     NULL },&ll.ev.sc) });
     Vector_Push(&ll.ev.epm,(ExternPackage[]){ ExternPackage_Make(ll.dllpath,"pointer","Ex_Packer",  (CStr[]){ POINTER_TYPE, NULL },&ll.ev.sc) });
@@ -1633,25 +1648,25 @@ void RexLang_Build_Externs(RexLang* ll,String* str) {
     if(ll->externs.size>0) String_Append(str,"\n");
 }
 void RexLang_Build_Globals(RexLang* ll,String* str) {
-    for(int i = 0;i<ll->globals.size;i++){
-        CStr name = *(CStr*)CVector_Get(&ll->globals,i);
-        String_Append(str,"global ");
-        String_Append(str,name);
-        String_Append(str,"\n");
-    }
-    if(ll->globals.size>0) String_Append(str,"\n");
+    //for(int i = 0;i<ll->globals.size;i++){
+    //    CStr name = *(CStr*)CVector_Get(&ll->globals,i);
+    //    String_Append(str,"");
+    //    String_Append(str,name);
+    //    String_Append(str,"\n");
+    //}
+    //if(ll->globals.size>0) String_Append(str,"\n");
 }
 void RexLang_Build_EntryPoint(RexLang* ll) {
-    String_Append(&ll->text,"\n_start:\n");
-    String_Appendf(&ll->text,"%ssub sp      %d\n",RexLang_INDENTATION,RexLang_Bytes(ll));
+    String_Append(&ll->text,"\nglobal _start:\n");
+    String_Appendf(&ll->text,"%ssub\t\tsp\t%d\n",RexLang_INDENTATION,RexLang_Bytes(ll));
     
     CStr fmain = RexLang_FunctionName(ll,"main");
-    String_Appendf(&ll->text,"%scall %s\n",RexLang_INDENTATION,fmain);
+    String_Appendf(&ll->text,"%scall\t%s\n",RexLang_INDENTATION,fmain);
     CStr_Free(&fmain);
     
-    String_Appendf(&ll->text,"%sld r0       sp\n",RexLang_INDENTATION);
-    String_Appendf(&ll->text,"%sadd sp      %d\n",RexLang_INDENTATION,RexLang_Bytes(ll));
-    String_Appendf(&ll->text,"%smov $0      r0\n",RexLang_INDENTATION);
+    String_Appendf(&ll->text,"%sld\t\tr0\tsp\n",RexLang_INDENTATION);
+    String_Appendf(&ll->text,"%sadd\t\tsp\t%d\n",RexLang_INDENTATION,RexLang_Bytes(ll));
+    String_Appendf(&ll->text,"%smov\t\t$0\tr0\n\n",RexLang_INDENTATION);
 }
 void RexLang_Build(RexLang* ll) {
     RexLang_Construct_EntryPoint(ll);

@@ -19,7 +19,7 @@ Token Struct_Struct_Handler_Ass(RexLang* ll,Token* op,Vector* args){
 
         const int offset_a = ll->stack - va_s->stack;
         const int offset_b = ll->stack - vb_s->stack;
-
+        
         CStr location_a = CStr_Format("[%s + %d",RexLang_REG_SP_64,offset_a);
         CStr location_b = CStr_Format("[%s + %d",RexLang_REG_SP_64,offset_b);
         
@@ -188,7 +188,6 @@ Token Struct_Null_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     String_Free(&ret);
     return Token_Move(TOKEN_CONSTSTRING_DOUBLE,out);
 }
-
 Token Struct_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
 

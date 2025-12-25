@@ -27,7 +27,6 @@ Token Dref_Null_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     String_Free(&ret);
     return Token_Move(TOKEN_CONSTSTRING_DOUBLE,out);
 }
-
 Token Dref_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
 
