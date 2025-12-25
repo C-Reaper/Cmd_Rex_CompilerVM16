@@ -1,0 +1,55 @@
+# === Makefile.linux ===
+
+CC = gcc
+CFLAGS = -O0 -mavx2 -std=gnu17
+INCLUDES = -Isrc
+LDFLAGS = -lm
+
+SRC_DIR = src
+BUILD_DIR = build
+CODE_DIR = code
+
+LIB_DIR = libs
+BIN_DIR = bin
+
+LIB_FILES = $(wildcard $(LIB_DIR)/*.c)
+SO_FILES = $(patsubst $(LIB_DIR)/%.c,$(BIN_DIR)/%.so,$(LIB_FILES))
+
+TARGET = $(BUILD_DIR)/Main
+
+all: 
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) ./$(SRC_DIR)/Main.c -o ./$(TARGET) $(LDFLAGS) 
+
+alldebug:
+# -fsanitize=address 
+	$(CC) -g $(CFLAGS) $(INCLUDES) ./$(SRC_DIR)/Main.c -o ./$(TARGET) $(LDFLAGS) 
+
+debug:
+	gdb ./$(TARGET) ./code/Main.rex ./asm/Main.asm
+
+exe:
+	./$(TARGET) ./code/Main.rex ./asm/Main.asm
+
+clean:
+	rm -rf $(BUILD_DIR)/*
+
+cleanlib:
+	rm -rf $(BIN_DIR)/*
+
+lib: $(SO_FILES)
+
+$(BIN_DIR)/%.so: $(LIB_DIR)/%.c
+	$(CC) $(CFLAGS) -g -fPIC -o $@ $< -shared $(LDFLAGS)
+
+comp:
+	nasm -f elf64 -g -F dwarf ./asm/Main.asm -o ./build/Output.o
+	ld -m elf_x86_64 -no-pie ./build/Output.o -o ./build/Output
+#gdb ./build/Output
+	./build/Output; echo $$?
+
+do: clean all exe
+
+dg: clean alldebug debug
+
+# === Makefile.linux ===

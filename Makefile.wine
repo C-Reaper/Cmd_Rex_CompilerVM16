@@ -1,0 +1,34 @@
+# === Makefile.wine ===
+
+CC = x86_64-w64-mingw32-gcc
+CFLAGS = -O0 -mavx2 -std=gnu17
+INCLUDES = -Isrc
+LDFLAGS = -lm
+SRC_DIR = ./src
+BUILD_DIR = ./build
+TARGET = $(BUILD_DIR)/Main.exe
+
+all: 
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) ./$(SRC_DIR)/Main.c -o ./$(TARGET) $(LDFLAGS) 
+
+alldebug: 
+	$(CC) -g $(CFLAGS) $(INCLUDES) ./$(SRC_DIR)/Main.c -o ./$(TARGET) $(LDFLAGS) 
+
+debug:
+	WINEPREFIX=~/wine64 WINEARCH=win64 winedbg $(TARGET) ./code/Main.rex ./asm/Main.asm
+
+exe: $(TARGET)
+	WINEPREFIX=~/wine64 WINEARCH=win64 wine $(TARGET) ./code/Main.rex ./asm/Main.asm
+
+comp:
+	echo "Compiler Target Platform is Linux!"
+
+clean:
+	rm -f $(BUILD_DIR)/*
+
+dg: clean alldebug debug
+
+do: clean all exe
+
+# === Makefile.wine ===
