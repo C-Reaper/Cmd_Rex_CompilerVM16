@@ -1,7 +1,7 @@
 #include "/home/codeleaded/System/Static/Library/AlxCallStack.h"
 #include "/home/codeleaded/System/Static/Library/AlxExternFunctions.h"
-#include "/home/codeleaded/System/Static/Library/RexLang.h"
-#include "/home/codeleaded/System/Static/Library/RexLangASM.h"
+#include "../src/RexLang.h"
+#include "../src/RexLangASM.h"
 
 Token Struct_Struct_Handler_Ass(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
@@ -16,48 +16,23 @@ Token Struct_Struct_Handler_Ass(RexLang* ll,Token* op,Vector* args){
 
         const int realsize = RexLang_TypeRealSize(ll,a);
         //int realsize = RexLang_TypeRealSize(ll,b);
-
-        const int offset_a = ll->stack - va_s->stack;
-        const int offset_b = ll->stack - vb_s->stack;
         
-        CStr location_a = CStr_Format("[%s + %d",RexLang_REG_SP_64,offset_a);
-        CStr location_b = CStr_Format("[%s + %d",RexLang_REG_SP_64,offset_b);
-        
-        if(RexLang_DrefType(ll,va->typename)){
-            RexLang_DrefIntoReg(ll,a,RexLang_REG_D_64);
-            
-            CStr setter = CStr_Format("[%s",RexLang_REG_D_64);
-            CStr_Set(&location_a,setter);
-            CStr_Free(&setter);
-        }
-        if(RexLang_DrefType(ll,vb->typename)){
-            RexLang_DrefIntoReg(ll,b,RexLang_REG_C_64);
-            
-            CStr setter = CStr_Format("[%s",RexLang_REG_C_64);
-            CStr_Set(&location_b,setter);
-            CStr_Free(&setter);
-        }
+        RexLang_AddressReg(ll,a,RexLang_REG_C);
+        RexLang_AddressReg(ll,b,RexLang_REG_B);
 
         int i = 0;
-        for(;i<=realsize-8;i+=8){
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s%s + %d]",RexLang_REG_A_64,RexLang_DREF_64,location_b,i);
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s%s + %d],%s",RexLang_DREF_64,location_a,i,RexLang_REG_A_64);
-        }
-        for(;i<=realsize-4;i+=4){
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s%s + %d]",RexLang_REG_A_32,RexLang_DREF_32,location_b,i);
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s%s + %d],%s",RexLang_DREF_32,location_a,i,RexLang_REG_A_32);
-        }
         for(;i<=realsize-2;i+=2){
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s%s + %d]",RexLang_REG_A_16,RexLang_DREF_16,location_b,i);
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s%s + %d],%s",RexLang_DREF_16,location_a,i,RexLang_REG_A_16);
+            RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_B);
+            RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t%s\t%s",RexLang_REG_C,RexLang_REG_A);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t%s\t2",RexLang_REG_C);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t%s\t2",RexLang_REG_B);
         }
         for(;i<=realsize-1;i+=1){
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s%s + %d]",RexLang_REG_A_L8,RexLang_DREF_8,location_b,i);
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s%s + %d],%s",RexLang_DREF_8,location_a,i,RexLang_REG_A_L8);
+            RexLang_Indentation_Appendf(ll,&ll->text,"ld1\t\t%s\t%s",RexLang_REG_A,RexLang_REG_B);
+            RexLang_Indentation_Appendf(ll,&ll->text,"st1\t\t%s\t%s",RexLang_REG_C,RexLang_REG_A);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add1\t%s\t1",RexLang_REG_C);
+            RexLang_Indentation_Appendf(ll,&ll->text,"add1\t%s\t1",RexLang_REG_B);
         }
-
-        CStr_Free(&location_b);
-        CStr_Free(&location_a);
     }else{
         Environment_ErrorHandler(&ll->ev,"Ass: Error -> %s is no struct type!",b->str);
         return Token_Null();
@@ -70,29 +45,23 @@ Token Struct_Handler_Adr(RexLang* ll,Token* op,Vector* args){
     
     if(a->tt==TOKEN_STRING){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
-        RexLangVariable* va = (RexLangVariable*)Variable_Data(v);
         CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
+        
+        CStr type = NULL;
 
         if(RexLang_DrefType(ll,v->typename)){
-            CStr type = CStr_Cpy(v->typename);
+            type = CStr_Cpy(v->typename);
             type[CStr_Size(type) - 1] = '*';
-            RexLang_Variable_Build_Decl(ll,stack_name,type);
-            CStr_Free(&type);
-
-            CStr location_a = RexLang_StackAtNT(ll,va->stack);
-            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",RexLang_REG_A_64,location_a);
-            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A_64);
         }else{
-            CStr type = CStr_Concat(v->typename,"*");
-            RexLang_Variable_Build_Decl(ll,stack_name,type);
-            CStr_Free(&type);
-
-            CStr location_a = RexLang_StackAtNT(ll,va->stack);
-            RexLang_Indentation_Appendf(ll,&ll->text,"lea %s,%s",RexLang_REG_A_64,location_a);
-            RexLang_IntoSet(ll,&stack_t,RexLang_REG_A_64);
+            type = CStr_Concat(v->typename,"*");
         }
-        
+
+        RexLang_Variable_Build_Decl(ll,stack_name,type);
+        CStr_Free(&type);
+
+        RexLang_AddressReg(ll,a,RexLang_REG_A);
+        RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
         return stack_t;
     }else{
         Environment_ErrorHandler(&ll->ev,"Adr: Error -> %s has no address!",a->str);
@@ -119,27 +88,33 @@ Token Struct_Handler_Acs(RexLang* ll,Token* op,Vector* args){
                             if(CStr_Cmp(b->str,m->name)) break;
                             offset += RexLang_Size(ll,m->type);
                         }
+                        
                         CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
+                        Token stack_t = Token_Move(TOKEN_STRING,stack_name);
 
                         if(!RexLang_DrefType(ll,v->typename)){
-                            RexLang_Variable_Build_Use(ll,stack_name,member->type,sv->stack - offset);
+                            CStr type = CStr_Concat(member->type,"&");
+                            RexLang_Variable_Build_Decl(ll,stack_name,type);
+                            CStr_Free(&type);
+
+                            RexLang_AddressReg(ll,a,RexLang_REG_C);
+                            RexLang_AddressReg(ll,b,RexLang_REG_B);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_C);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t%s\t%d",RexLang_REG_A,offset);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t%s\t%s",RexLang_REG_B,RexLang_REG_A);
                         }else{
                             CStr type = CStr_Concat(member->type,"&");
                             RexLang_Variable_Build_Decl(ll,stack_name,type);
                             CStr_Free(&type);
 
-                            CStr location_a = RexLang_Location(ll,a->str);
-                            CStr location_s = RexLang_Location(ll,stack_name);
-
-                            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",RexLang_REG_A_64,location_a);
-                            RexLang_Indentation_Appendf(ll,&ll->text,"mov %s,%s",location_s,RexLang_REG_A_64);
-                            RexLang_Indentation_Appendf(ll,&ll->text,"add %s,%d",location_s,offset);
-
-                            CStr_Free(&location_a);
-                            CStr_Free(&location_s);
+                            RexLang_AddressReg(ll,a,RexLang_REG_C);
+                            RexLang_AddressReg(ll,b,RexLang_REG_B);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_C);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_A);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t%s\t%d",RexLang_REG_A,offset);
+                            RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t%s\t%s",RexLang_REG_B,RexLang_REG_A);
                         }
-
-                        return Token_Move(TOKEN_STRING,stack_name);
+                        return stack_t;
                     }else{
                         Environment_ErrorHandler(&ll->ev,"Acs: Member %s isn't pub or non self %s tries to access!",b->str,a->str);
                         return Token_Null();

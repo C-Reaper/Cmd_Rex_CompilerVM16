@@ -976,11 +976,9 @@ void RexLang_AddressReg(RexLang* ll,Token* a,CStr reg){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
             if(RexLang_DrefType(ll,v->typename)){
-                RexLang_DrefIntoReg(ll,a,RexLang_REG_D);
-                RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t%s",reg,RexLang_REG_D);
+                RexLang_DrefIntoReg(ll,a,reg);
             }else{
-                CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
-                RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t%s",reg,location);
+                CStr location = RexLang_Location(ll,reg,a->str);
             }
         }else{
             Compiler_ErrorHandler(&ll->ev,"AddressReg -> Error: %s is not a var!",a->str);

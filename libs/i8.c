@@ -138,6 +138,19 @@ Token I8_Handler_Adr(RexLang* ll,Token* op,Vector* args){
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
+        
+        CStr type = NULL;
+
+        if(RexLang_DrefType(ll,v->typename)){
+            type = CStr_Cpy(v->typename);
+            type[CStr_Size(type) - 1] = '*';
+        }else{
+            type = CStr_Concat(v->typename,"*");
+        }
+
+        RexLang_Variable_Build_Decl(ll,stack_name,type);
+        CStr_Free(&type);
+
         RexLang_AddressReg(ll,a,RexLang_REG_A);
         RexLang_IntoSet(ll,&stack_t,RexLang_REG_A);
         return stack_t;
