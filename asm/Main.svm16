@@ -14,27 +14,133 @@ global _start:
 
 f.main:
     sub		sp	2
+    sub		sp	20
+    mov		r0	sp
+    add		r0	20
+    st		r0	sp
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    l.0_FOR3_0:
+    sub		sp	1
+    sub		sp	1
+    mov		r3	sp
+    add		r3	2
+    ld2		r0	r3
+    sub2		r0	10
+    jn		lcmp.0_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.1_END
+    lcmp.0_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.1_END:
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	1
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    add		sp	1
+    sub r0,0
+    jz l.1_FOR3_0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	24
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r3	r3
+    imul2		r3	2
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    mov		r2	sp
+    add		r2	2
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
+    mov		r3	sp
+    add		r3	4
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    ld2		r3	r3
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    add		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    add2		r2	1
+    st2		r3	r2
+    jmp		l.0_FOR3_0
+    l.1_FOR3_0:
+    add		sp	2
+    sub		sp	2
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
     mov2		r2	0
     st2		r3	r2
     sub		sp	2
-    sub		sp	8
-    mov		r0	sp
-    add		r0	8
-    st		r0	sp
-    sub		sp	2
-    mov		r3	sp
-    add		r3	12
-    ld2		r0	r3
-    add2		r0	0
     mov		r3	sp
     add		r3	0
-    st2		r3	r0
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    l.0_FOR3_1:
+    sub		sp	1
+    sub		sp	1
+    mov		r3	sp
+    add		r3	2
+    ld2		r0	r3
+    sub2		r0	10
+    jn		lcmp.2_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.3_END
+    lcmp.2_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.3_END:
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	1
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    add		sp	1
+    sub r0,0
+    jz l.1_FOR3_1
     sub		sp	2
     mov		r3	sp
-    add		r3	12
+    add		r3	26
     ld2		r0	r3
     mov		r3	sp
     add		r3	2
@@ -54,48 +160,36 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r3	r3
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	6
     ld2		r2	r3
-    mov2		r2	1
+    add2		r2	r0
     st2		r3	r2
     add		sp	2
     add		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    add2		r2	1
+    st2		r3	r2
+    jmp		l.0_FOR3_1
+    l.1_FOR3_1:
     add		sp	2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	10
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	12
-    ld2		r3	r3
-    imul2		r3	2
-    add2		r0	r3
     mov		r3	sp
     add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
     ld2		r0	r3
     mov		r3	sp
-    add		r3	18
+    add		r3	26
     ld2		r2	r3
     mov2		r2	r0
     st2		r3	r2
     add		sp	2
     add		sp	2
-    add		sp	2
-    add		sp	8
-    add		sp	2
+    add		sp	20
     ret
     add		sp	2
-    add		sp	8
     add		sp	2
+    add		sp	20
     ret
 

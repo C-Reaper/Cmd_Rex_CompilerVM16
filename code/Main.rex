@@ -1,12 +1,15 @@
 
 u16 main(){
-    u16 a = 0;
-    u16[4] buffer;
+    u16[10] a;
     
-    buffer[a + 0] = 1;
-    //buffer[a + 1] = 2;
-    //buffer[a + 2] = 3;
-    //buffer[a + 3] = 4;
+    for u16 i = 0,i<10,i+=1 {
+        a[i] = i;
+    }
+
+    u16 sum = 0;
+    for u16 i = 0,i<10,i+=1 {
+        sum += a[i];
+    }
     
-    return buffer[a];
+    return sum;
 }
