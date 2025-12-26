@@ -36,7 +36,7 @@ Token Pointer_Pointer_Handler_Add(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     
-    int realsize_a = RexLang_TypeRealSize(ll,a);
+    int realsize_a = RexLang_TypeDrefPtrSize(ll,a);
     CStr imm = Number_Get(realsize_a);
     Token ret = RexLang_ExecuteP(ll,a,b,op,"add","ADD","imul",imm,RexLang_Function_Add,RexLang_Function_Mul);
     CStr_Free(&imm);
@@ -46,7 +46,7 @@ Token Pointer_Pointer_Handler_Sub(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
     
-    int realsize_a = RexLang_TypeRealSize(ll,a);
+    int realsize_a = RexLang_TypeDrefPtrSize(ll,a);
     CStr imm = Number_Get(realsize_a);
     Token ret = RexLang_ExecuteP(ll,a,b,op,"sub","SUB","imul",imm,RexLang_Function_Sub,RexLang_Function_Mul);
     CStr_Free(&imm);

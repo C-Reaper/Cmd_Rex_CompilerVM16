@@ -155,7 +155,7 @@ int RexLang_Size(RexLang* ll,CStr name){
             Token (*Handler)(void*,Token*,Vector*) = Scope_HandlerOf(&ll->ev.sc,&op,name,&othertypes);
             //for(int i = 0;i<types.size;i++) CStr_Free((CStr*)Vector_Get(&types,i));
             Vector_Free(&othertypes);
-        
+            
             if(Handler){
                 TokenMap args = TokenMap_Make((Token[]){ Token_By(TOKEN_STRING,t->name),Token_Null() });
                 Token Item = Handler(ll,&op,&args);
@@ -259,11 +259,11 @@ CStr RexLang_ConstStr(RexLang* ll,CStr name){
                 String_AppendChar(&value,'\"');
                 String_AppendString(&value,&buffer);
                 String_AppendChar(&value,'\"');
-                String_AppendChar(&value,',');
+                String_AppendChar(&value,' ');
                 String_Clear(&buffer);
             }
             String_AppendNumber(&value,name[i]);
-            String_AppendChar(&value,',');
+            String_AppendChar(&value,' ');
         }
 
         if(i == size - 1){
@@ -271,7 +271,7 @@ CStr RexLang_ConstStr(RexLang* ll,CStr name){
                 String_AppendChar(&value,'\"');
                 String_AppendString(&value,&buffer);
                 String_AppendChar(&value,'\"');
-                String_AppendChar(&value,',');
+                String_AppendChar(&value,' ');
             }
         }
     }
@@ -283,11 +283,11 @@ CStr RexLang_ConstStr(RexLang* ll,CStr name){
     return cstr_value;
 }
 CStr RexLang_BuildConstStr(RexLang* ll,CStr cstr){
-    CStr name = RexLang_Conststr_Next(ll,"GLOBAL_STR",10);
+    CStr name = RexLang_Conststr_Next(ll,"GLOBAL.STR",10);
     CVector_Push(&ll->constsstr,(CStr[]){ CStr_Cpy(name) });
     
     CStr cstr_value = RexLang_ConstStr(ll,cstr);
-    String_Appendf(&ll->data,"%s:\n" RexLang_INDENTATION "%s\n",name,cstr_value);
+    String_Appendf(&ll->data,"%s:\n" RexLang_INDENTATION VM16_OP_BYTE " %s\n",name,cstr_value);
     CStr_Free(&cstr_value);
     return name;
 }
@@ -457,6 +457,31 @@ int RexLang_TypeRealSize(RexLang* ll,Token* a){
     }
 
     int size = RexLang_Size(ll,type);
+    CStr_Free(&type);
+    return size;
+}
+int RexLang_TypeDrefPtrSizeT(RexLang* ll,CStr intype){
+    CStr type = CStr_Cpy(intype);
+    
+    if(RexLang_DrefType(ll,type)){
+        CStr ntype = RexLang_TypeOfDref(ll,type);
+        CStr_Set(&type,ntype);
+        CStr_Free(&ntype);
+    }
+    if(RexLang_PointerType(ll,type)){
+        CStr ptype = CStr_PopOff(type);
+        CStr_Set(&type,ptype);
+        CStr_Free(&ptype);
+    }
+
+    int size = RexLang_Size(ll,type);
+    CStr_Free(&type);
+    return size;
+}
+int RexLang_TypeDrefPtrSize(RexLang* ll,Token* a){
+    CStr type = RexLang_VariableType(ll,a);
+    if(!type) return 0;
+    const int size = RexLang_TypeDrefPtrSizeT(ll,type);
     CStr_Free(&type);
     return size;
 }
@@ -741,7 +766,7 @@ Token RexLang_Init(RexLang* ll,Token* op,Vector* args){
         if(v->range>0){
             if(size>0){
                 ll->stack += size;
-                RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\trsp,%d",size);
+                RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\tsp\t%d",size);
             }
             *sv = RexLangVariable_New(ll->stack,0,1,ll);
         }else{
@@ -895,7 +920,7 @@ void RexLang_IntoReg(RexLang* ll,Token* a,CStr reg){
         Compiler_ErrorHandler(&ll->ev,"IntoReg -> Error: %s is a float!",a->str);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
         Boolean b = Boolean_Parse(a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_8 "%s\t%d",reg,b);
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_8 "\t%s\t%d",reg,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
         RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t0",reg);
     }else if(a->tt==TOKEN_CONSTSTRING_SINGLE){

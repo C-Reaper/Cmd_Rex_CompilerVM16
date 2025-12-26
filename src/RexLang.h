@@ -955,7 +955,7 @@ Boolean RexLang_Return(RexLang* ll,TokenMap* tm){
         CStr retaddress = RexLang_StackDir(ll,8,0);
         RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\trax\t%s",retaddress);
         CStr_Free(&retaddress);
-        RexLang_Indentation_Appendf(ll,&ll->text,"add\t\trsp\t%d",RexLang_Bytes(ll));
+        RexLang_Indentation_Appendf(ll,&ll->text,"add\t\tsp\t%d",RexLang_Bytes(ll));
         Scope_Range_DestroyOnly(&ll->ev.sc,1);
         RexLang_Indentation_Appendf(ll,&ll->text,"push\trax");
     }*/
@@ -989,7 +989,7 @@ Boolean RexLang_Decl(RexLang* ll,TokenMap* tm){
                         return False;
                     }
 
-                    RexLang_Variable_Build_DeclStack(ll,name->str,pottype->str,size * RexLang_Size(ll,pottype->str));
+                    RexLang_Variable_Build_DeclStack(ll,name->str,pottype->str,size * RexLang_TypeDrefPtrSizeT(ll,pottype->str));
                 }else{
                     RexLang_Variable_Build_Decl(ll,name->str,pottype->str);
                 }
@@ -1059,9 +1059,6 @@ Boolean RexLang_Break(RexLang* ll,TokenMap* tm){
 }
 
 Boolean RexLang_Assembly(RexLang* ll,TokenMap* tm){
-    CStr indent = RexLang_Indentation_CStr(ll);
-    String_Append(&ll->text,indent);
-    CStr_Free(&indent);
     int pulled = 3;
 
     for(int i = 1;i<tm->size;i++){
@@ -1078,6 +1075,11 @@ Boolean RexLang_Assembly(RexLang* ll,TokenMap* tm){
     }    
 
     pulled = 3;
+
+    CStr indent = RexLang_Indentation_CStr(ll);
+    String_Append(&ll->text,indent);
+    CStr_Free(&indent);
+
     for(int i = 1;i<tm->size;i++){
         Token* t = (Token*)Vector_Get(tm,i);
 
@@ -1633,11 +1635,9 @@ RexLang RexLang_New(char* dllpath,char* src,char* output,char bits) {
 void RexLang_PrintVariable(RexLang* ll,Variable* v) {
     Scope_PrintVariableDirect(&ll->ev.sc,v);
 }
-
 void RexLang_Construct_EntryPoint(RexLang* ll) {
     CVector_Push(&ll->globals,(CStr[]){ CStr_Cpy("_start") });
 }
-
 void RexLang_Build_Externs(RexLang* ll,String* str) {
     for(int i = 0;i<ll->externs.size;i++){
         CStr name = *(CStr*)CVector_Get(&ll->externs,i);
@@ -1675,7 +1675,7 @@ void RexLang_Build(RexLang* ll) {
     Compiler_Begin(&ll->ev);
     
     if(!ll->ev.error){
-        String output = String_Format(";|\n;| RexLang by codeleaded\n;| Arch: VM16\n;| bits %d\n;|\n\n",ll->bits);
+        String output = String_Format(";|\n;| RexLang by codeleaded\n;| Arch: VM16\n;| bits %d\n;|\n",ll->bits);
         //String_Append(&output,"\nsection .bss\n");
         //String_AppendString(&output,&ll->bss);
         //String_Append(&output,"\nsection .data\n");
@@ -1684,6 +1684,8 @@ void RexLang_Build(RexLang* ll) {
         //RexLang_Build_Externs(ll,&output);
         //RexLang_Build_Globals(ll,&output);
         String_AppendString(&output,&ll->text);
+        String_AppendString(&output,&ll->bss);
+        String_AppendString(&output,&ll->data);
 
         Files_WriteT(ll->output,output.Memory,output.size);
         String_Free(&output);
