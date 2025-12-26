@@ -989,7 +989,7 @@ Boolean RexLang_Decl(RexLang* ll,TokenMap* tm){
                         return False;
                     }
 
-                    RexLang_Variable_Build_DeclStack(ll,name->str,pottype->str,size);
+                    RexLang_Variable_Build_DeclStack(ll,name->str,pottype->str,size * RexLang_Size(ll,pottype->str));
                 }else{
                     RexLang_Variable_Build_Decl(ll,name->str,pottype->str);
                 }

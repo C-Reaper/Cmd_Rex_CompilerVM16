@@ -35,12 +35,22 @@ Token Pointer_Pointer_Handler_Ass(RexLang* ll,Token* op,Vector* args){
 Token Pointer_Pointer_Handler_Add(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_Execute(ll,a,b,op,"add","ADD",RexLang_Function_Add);
+    
+    int realsize_a = RexLang_TypeRealSize(ll,a);
+    CStr imm = Number_Get(realsize_a);
+    Token ret = RexLang_ExecuteP(ll,a,b,op,"add","ADD","imul",imm,RexLang_Function_Add,RexLang_Function_Mul);
+    CStr_Free(&imm);
+    return ret;
 }
 Token Pointer_Pointer_Handler_Sub(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_Execute(ll,a,b,op,"sub","SUB",RexLang_Function_Sub);
+    
+    int realsize_a = RexLang_TypeRealSize(ll,a);
+    CStr imm = Number_Get(realsize_a);
+    Token ret = RexLang_ExecuteP(ll,a,b,op,"sub","SUB","imul",imm,RexLang_Function_Sub,RexLang_Function_Mul);
+    CStr_Free(&imm);
+    return ret;
 }
 
 Token Pointer_Pointer_Handler_Equ(RexLang* ll,Token* op,Vector* args){
@@ -122,29 +132,23 @@ Token Pointer_Handler_Drf(RexLang* ll,Token* op,Vector* args){
         
         if(RexLang_DrefType(ll,v->typename)){
             CStr type = CStr_PopOff(v->typename);
-            type[CStr_Size(type) - 1] = '&';
             RexLang_Variable_Build_Decl(ll,stack_name,type);
             CStr_Free(&type);
-            
-            Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-            RexLang_AddressReg(ll,a,RexLang_REG_C);
-            RexLang_AddressReg(ll,&stack_t,RexLang_REG_B);
-            RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_C);
-            RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t%s\t%s",RexLang_REG_B,RexLang_REG_A);
-            return stack_t;
         }else{
             CStr type = CStr_Cpy(v->typename);
-            type[CStr_Size(type) - 1] = '&';
             RexLang_Variable_Build_Decl(ll,stack_name,type);
             CStr_Free(&type);
-            
-            Token stack_t = Token_Move(TOKEN_STRING,stack_name);
-            RexLang_AddressReg(ll,a,RexLang_REG_C);
-            RexLang_AddressReg(ll,&stack_t,RexLang_REG_B);
-            RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_C);
-            RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t%s\t%s",RexLang_REG_B,RexLang_REG_A);
-            return stack_t;
         }
+            
+        Token stack_t = Token_Move(TOKEN_STRING,stack_name);
+        RexLang_AddressReg(ll,a,RexLang_REG_C);
+        RexLang_AddressReg(ll,&stack_t,RexLang_REG_B);
+        RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_C);
+        RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t%s\t%s",RexLang_REG_B,RexLang_REG_A);
+        
+        Variable* vref = Scope_FindVariable(&ll->ev.sc,stack_name);
+        vref->typename[CStr_Size(vref->typename) - 1] = '&';
+        return stack_t;
     }else{
         Environment_ErrorHandler(&ll->ev,"Drf: Error -> %s has no dref op!",a->str);
         return Token_Null();
@@ -176,21 +180,17 @@ Token Pointer_Handler_Arw(RexLang* ll,Token* op,Vector* args){
                         CStr stack_name = RexLang_Variablename_Next(ll,".STACK",6);
                         Token stack_t = Token_Move(TOKEN_STRING,stack_name);
 
-                        if(!RexLang_DrefType(ll,v->typename)){
-                            CStr type = CStr_Concat(member->type,"&");
-                            RexLang_Variable_Build_Decl(ll,stack_name,type);
-                            CStr_Free(&type);
+                        CStr type = CStr_Concat(member->type,"&");
+                        RexLang_Variable_Build_Decl(ll,stack_name,type);
+                        CStr_Free(&type);
 
+                        if(!RexLang_DrefType(ll,v->typename)){
                             RexLang_AddressReg(ll,a,RexLang_REG_C);
                             RexLang_AddressReg(ll,&stack_t,RexLang_REG_B);
                             RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_C);
                             RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t%s\t%d",RexLang_REG_A,offset);
                             RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t%s\t%s",RexLang_REG_B,RexLang_REG_A);
                         }else{
-                            CStr type = CStr_Concat(member->type,"&");
-                            RexLang_Variable_Build_Decl(ll,stack_name,type);
-                            CStr_Free(&type);
-
                             RexLang_AddressReg(ll,a,RexLang_REG_C);
                             RexLang_AddressReg(ll,&stack_t,RexLang_REG_B);
                             RexLang_Indentation_Appendf(ll,&ll->text,"ld\t\t%s\t%s",RexLang_REG_A,RexLang_REG_C);
@@ -198,6 +198,9 @@ Token Pointer_Handler_Arw(RexLang* ll,Token* op,Vector* args){
                             RexLang_Indentation_Appendf(ll,&ll->text,"add\t\t%s\t%d",RexLang_REG_A,offset);
                             RexLang_Indentation_Appendf(ll,&ll->text,"st\t\t%s\t%s",RexLang_REG_B,RexLang_REG_A);
                         }
+
+                        Variable* vref = Scope_FindVariable(&ll->ev.sc,stack_name);
+                        vref->typename[CStr_Size(vref->typename) - 1] = '&';
                         return stack_t;
                     }else{
                         Environment_ErrorHandler(&ll->ev,"Arw: Member %s isn't pub or non self %s tries to access!",b->str,a->str);
@@ -220,7 +223,6 @@ Token Pointer_Handler_Arw(RexLang* ll,Token* op,Vector* args){
         return Token_Null();
     }
 }
-
 Token Pointer_I64_Handler_Subs(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
@@ -238,7 +240,6 @@ Token Pointer_I64_Handler_Subs(RexLang* ll,Token* op,Vector* args){
     Token_Free(&add);
     return ret;
 }
-
 Token Pointer_Null_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
 
