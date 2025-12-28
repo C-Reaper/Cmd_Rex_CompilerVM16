@@ -1,4 +1,8 @@
 
+u16 add(u16 a,u16 b){
+    return a + b;
+}
+
 u16 main(){
     u16[10] a;
     
