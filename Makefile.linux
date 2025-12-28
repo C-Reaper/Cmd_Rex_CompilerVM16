@@ -43,7 +43,7 @@ $(BIN_DIR)/%.so: $(LIB_DIR)/%.c
 	$(CC) $(CFLAGS) -g -fPIC -o $@ $< -shared $(LDFLAGS)
 
 comp:
-	$(CC) $(CFLAGS) $(INCLUDES) $(SRC_DIR)/VM16.c -o $(BUILD_DIR)/VM16 $(LDFLAGS) 
+	$(CC) -g $(CFLAGS) $(INCLUDES) $(SRC_DIR)/VM16.c -o $(BUILD_DIR)/VM16 $(LDFLAGS) 
 	$(BUILD_DIR)/VM16
 
 do: clean all exe

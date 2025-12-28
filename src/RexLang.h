@@ -1060,7 +1060,7 @@ Boolean RexLang_Break(RexLang* ll,TokenMap* tm){
 
 Boolean RexLang_Assembly(RexLang* ll,TokenMap* tm){
     int pulled = 3;
-
+    
     for(int i = 1;i<tm->size;i++){
         Token* t = (Token*)Vector_Get(tm,i);
 
@@ -1069,7 +1069,7 @@ Boolean RexLang_Assembly(RexLang* ll,TokenMap* tm){
                 Compiler_ErrorHandler(&ll->ev,"asm: assembly keyword can't handle more then 4 args: %s!",t->str);
                 return False;
             }
-            RexLang_IntoReg(ll,t,RexLang_RT[pulled]);
+            RexLang_AddressReg(ll,t,RexLang_RT[pulled]);
             pulled--;
         }
     }    
