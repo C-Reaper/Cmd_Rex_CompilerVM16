@@ -1,0 +1,51 @@
+import Kernel;
+import Display;
+import GPU;
+import Shell;
+
+u16 main(){
+    u16 stop = 0;
+    u16 len = 0;
+    u8[1000] buffer;
+
+    buffer[len] = '$';
+    len += 1;
+    buffer[len] = ' ';
+    len += 1;
+    stop = len;
+
+    while dsp_get_running() != 0 {
+        dsp_update();
+
+        u16 last = dsp_get_lastchar();
+        if dsp_get_stroke(DSP_STROKE_BACKSPACE,DSP_STATE_PRESSED) != 0 {
+            if len > stop {
+                len -= 1;
+                buffer[len] = ' ';
+            }
+        }elif dsp_get_stroke(DSP_STROKE_ENTER,DSP_STATE_PRESSED) != 0 {
+            buffer[len] = 0;
+
+            shell_exe(buffer + stop);
+
+            buffer[len] = '\n';
+            len += 1;
+            buffer[len] = '$';
+            len += 1;
+            buffer[len] = ' ';
+            len += 1;
+            
+            stop = len;
+        }elif last != 0 {
+            buffer[len] = (u8)last;
+            len += 1;
+        }
+
+        gpu_clear(GPU_BLACK);
+        gpu_rendercstrln(buffer,len,GPU_WHITE);
+        
+        dsp_render();
+    }
+
+    return 0;
+}
