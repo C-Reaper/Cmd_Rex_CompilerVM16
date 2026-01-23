@@ -3,6 +3,8 @@
 // Inst: 16
 
 define DSP_STROKE_ESC        9;
+define DSP_STROKE_ENTER      36;
+define DSP_STROKE_BACKSPACE  22;
 define DSP_STROKE_W          25;
 define DSP_STROKE_S          39;
 define DSP_STROKE_A          38;
@@ -50,5 +52,10 @@ u16 dsp_get_stroke(u16 stroke,u16 state){
     asm "ld		r0  " stroke;
     asm "ld		r1  " state;
     asm "st		" value "  $20740";
+    return value;
+}
+u16 dsp_get_lastchar(){
+    u16 value;
+    asm "st		" value "  $20741";
     return value;
 }

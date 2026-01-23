@@ -35,6 +35,7 @@ int main(int argc,char** argv){
     VM16_ConnectDevice(&vm,(VM16_DSP[]){    VM16_DSP_New(VM16_DSP_LOW,      VM16_DSP_HIGH)      });
     VM16_ConnectDevice(&vm,(VM16_GPU[]){    VM16_GPU_New(VM16_GPU_LOW,      VM16_GPU_HIGH)      });
     //VM16_ConnectDevice(&vm,(VM16_SSD[]){    VM16_SSD_New(VM16_SSD_LOW,      VM16_SSD_HIGH)      });
+    VM16_ConnectDevice(&vm,(VM16_Shell[]){  VM16_Shell_New(VM16_SHELL_LOW,  VM16_SHELL_HIGH)    });
     
     VM16_Comp(&vm,PATH_ASM,PATH_LINK);
     VM16_Link(&vm,VM16_MEMORY_LOW,"_start",(CStr[]){ PATH_LINK,NULL },PATH_EXE);
