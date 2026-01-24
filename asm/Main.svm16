@@ -220,30 +220,72 @@ f.shell_exe:
     ld		$30479 r3
     ret
 
-f.main:
+f.shell_render:
+    sub		sp	2
+    mov		r2	sp
+    add		r2	6
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
     sub		sp	2
     mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	0
-    st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	0
-    st2		r3	r2
-    sub		sp	2
-    sub		sp	1000
-    mov		r0	sp
-    add		r0	1000
-    st		r0	sp
-    sub		sp	2
-    mov		r3	sp
-    add		r3	1002
+    add		r3	10
     ld2		r0	r3
     mov		r3	sp
-    add		r3	1004
+    add		r3	2
+    ld2		r3	r3
+    ld2		r3	r3
+    imul2		r3	1
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    mov		r2	sp
+    add		r2	2
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
+    mov2	r0	10
+    mov		r3	sp
+    add		r3	0
+    ld2		r3	r3
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    sub		sp	2
+    mov		r2	sp
+    add		r2	6
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r3	r3
+    ld2		r2	r3
+    add2		r2	1
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    mov		r2	sp
+    add		r2	6
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	10
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r3	r3
     ld2		r3	r3
     imul2		r3	1
     add2		r0	r3
@@ -266,17 +308,35 @@ f.main:
     st1		r3	r2
     add		sp	2
     add		sp	2
+    add		sp	2
+    sub		sp	2
+    mov		r2	sp
+    add		r2	6
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
     mov		r3	sp
-    add		r3	1002
+    add		r3	0
+    ld2		r3	r3
     ld2		r2	r3
     add2		r2	1
     st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    mov		r2	sp
+    add		r2	6
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
     sub		sp	2
     mov		r3	sp
-    add		r3	1002
+    add		r3	10
     ld2		r0	r3
     mov		r3	sp
-    add		r3	1004
+    add		r3	2
+    ld2		r3	r3
     ld2		r3	r3
     imul2		r3	1
     add2		r0	r3
@@ -299,19 +359,106 @@ f.main:
     st1		r3	r2
     add		sp	2
     add		sp	2
+    add		sp	2
+    sub		sp	2
+    mov		r2	sp
+    add		r2	6
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
     mov		r3	sp
-    add		r3	1002
+    add		r3	0
+    ld2		r3	r3
     ld2		r2	r3
     add2		r2	1
     st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    mov		r2	sp
+    add		r2	4
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
+    sub		sp	2
+    mov		r2	sp
+    add		r2	8
+    mov		r1	sp
+    add		r1	0
+    ld		r0	r2
+    st		r1	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r3	r3
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r3	r3
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    add		sp	2
+    ret
+
+f.shell_start:
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    sub		sp	2
+    sub		sp	1000
+    mov		r0	sp
+    add		r0	1000
+    st		r0	sp
+    sub		sp	2
     mov		r3	sp
     add		r3	1002
     ld2		r0	r3
     mov		r3	sp
-    add		r3	1004
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    sub		sp	2
+    mov		r0	sp
+    add		r0	1008
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    st2		r3	r0
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r0	sp
+    add		r0	1012
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    st2		r3	r0
+    add		sp	2
+    call	f.shell_render
+    add		sp	2
+    add		sp	2
+    add		sp	2
     l.0_WHILE2_0:
     sub		sp	1
     sub		sp	2
@@ -584,108 +731,40 @@ f.main:
     add		r3	1004
     ld2		r0	r3
     mov		r3	sp
-    add		r3	1006
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
-    mov		r3	sp
     add		r3	0
     st2		r3	r0
     sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov2	r0	10
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
-    add		sp	2
-    add		sp	2
-    mov		r3	sp
-    add		r3	1004
-    ld2		r2	r3
-    add2		r2	1
-    st2		r3	r2
     sub		sp	2
-    mov		r3	sp
-    add		r3	1004
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	1006
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
+    mov		r0	sp
+    add		r0	1010
     mov		r3	sp
     add		r3	0
     st2		r3	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov2	r0	36
     mov		r3	sp
     add		r3	0
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
-    add		sp	2
-    add		sp	2
-    mov		r3	sp
-    add		r3	1004
-    ld2		r2	r3
-    add2		r2	1
-    st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	1004
     ld2		r0	r3
     mov		r3	sp
-    add		r3	1006
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
+    add		r3	2
+    st2		r3	r0
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r0	sp
+    add		r0	1014
     mov		r3	sp
     add		r3	0
     st2		r3	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov2	r0	32
     mov		r3	sp
     add		r3	0
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
-    add		sp	2
-    add		sp	2
-    mov		r3	sp
-    add		r3	1004
-    ld2		r2	r3
-    add2		r2	1
-    st2		r3	r2
-    mov		r3	sp
-    add		r3	1004
     ld2		r0	r3
     mov		r3	sp
-    add		r3	1006
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
+    add		r3	2
+    st2		r3	r0
+    add		sp	2
+    call	f.shell_render
+    add		sp	2
+    add		sp	2
+    add		sp	2
     jmp		l.1_LOG3_0
     l.1_ELIF3_0_1:
     sub		sp	1
@@ -806,19 +885,19 @@ f.main:
     add		sp	2
     jmp		l.0_WHILE2_0
     l.1_WHILE2_0:
-    mov		r3	sp
-    add		r3	1008
-    ld2		r2	r3
-    mov2		r2	0
-    st2		r3	r2
     add		sp	2
     add		sp	1000
     add		sp	2
     add		sp	2
     ret
-    add		sp	2
-    add		sp	1000
-    add		sp	2
-    add		sp	2
+
+f.main:
+    call	f.shell_start
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    ret
     ret
 
