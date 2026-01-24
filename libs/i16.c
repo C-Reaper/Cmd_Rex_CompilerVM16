@@ -89,6 +89,7 @@ Token I16_Handler_Not(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     return RexLang_ExecuteSingle(ll,a,op,"not","NOT",RexLang_Function_Not);
 }
+
 Token I16_I16_Handler_Equ(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);

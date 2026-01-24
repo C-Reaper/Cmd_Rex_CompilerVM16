@@ -1143,13 +1143,13 @@ void RexLang_CmpAtReg(RexLang* ll,Token* a,CStr reg){
                 CStr typename = RexLang_TypeOfDref(ll,v->typename);
                 CStr typeselector = RexLang_TypeSelector_T(ll,typename);
                 RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,RexLang_REG_D,RexLang_REG_D);
-                RexLang_Indentation_Appendf(ll,&ll->text,"sub%s\t\t%s\t%s",typeselector,reg,RexLang_REG_D);
+                RexLang_Indentation_Appendf(ll,&ll->text,"cmp%s\t\t%s\t%s",typeselector,reg,RexLang_REG_D);
                 CStr_Free(&typename);
             }else{
                 CStr location = RexLang_Location(ll,RexLang_REG_D,a->str);
                 CStr typeselector = RexLang_TypeSelector_T(ll,v->typename);
                 RexLang_Indentation_Appendf(ll,&ll->text,"ld%s\t\t%s\t%s",typeselector,location,location);
-                RexLang_Indentation_Appendf(ll,&ll->text,"sub%s\t\t%s\t%s",typeselector,reg,location);
+                RexLang_Indentation_Appendf(ll,&ll->text,"cmp%s\t\t%s\t%s",typeselector,reg,location);
             }
         }else{
             Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is not a var!",a->str);
@@ -1158,18 +1158,18 @@ void RexLang_CmpAtReg(RexLang* ll,Token* a,CStr reg){
         Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is a float!",a->str);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
         Boolean b = Boolean_Parse(a->str);
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub" VM16_POST_ARCH_8 "\t\t%s\t%d",reg,b);
+        RexLang_Indentation_Appendf(ll,&ll->text,"cmp" VM16_POST_ARCH_8 "\t\t%s\t%d",reg,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t%s\t0",reg);
+        RexLang_Indentation_Appendf(ll,&ll->text,"cmp\t\t%s\t0",reg);
     }else if(a->tt==TOKEN_CONSTSTRING_SINGLE){
         Number val = 0;
         const int size = CStr_Size(a->str);
         for(int i = 0;i<size;i++){
             val += a->str[i] << (i * 8);
         }
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub" VM16_POST_ARCH_16 "\t\t%s\t%d",reg,val);
+        RexLang_Indentation_Appendf(ll,&ll->text,"cmp" VM16_POST_ARCH_16 "\t\t%s\t%d",reg,val);
     }else{
-        RexLang_Indentation_Appendf(ll,&ll->text,"sub" VM16_POST_ARCH_16 "\t\t%s\t%s",reg,a->str);
+        RexLang_Indentation_Appendf(ll,&ll->text,"cmp" VM16_POST_ARCH_16 "\t\t%s\t%s",reg,a->str);
     }
 }
 
