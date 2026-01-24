@@ -11,464 +11,45 @@ global _start:
     add		sp	2
     mov		$0	r0
 
-f.kernel_exit:
+f.tty_print:
     mov		r3	sp
     add		r3	2
-    ld		$0  r3
+    ld		$20480 r3
     ret
 
-f.kernel_sleep:
+f.tty_print_i16:
     mov		r3	sp
     add		r3	2
-    ld		$1  r3
+    ld		$20481 r3
     ret
 
-f.dsp_get_running:
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    st		r3  $20735
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	4
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
-    ret
-    add		sp	2
-    ret
-
-f.dsp_set_running:
+f.tty_print_hex:
     mov		r3	sp
     add		r3	2
-    ld		$20735  r3
+    ld		$20482 r3
     ret
 
-f.dsp_get_width:
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    st		r3  $20736
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	4
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
-    ret
-    add		sp	2
-    ret
-
-f.dsp_set_width:
+f.tty_get:
     mov		r3	sp
     add		r3	2
-    ld		$20736  r3
+    ld		$20483 r3
     ret
 
-f.dsp_get_height:
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    st		r3  $20737
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	4
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
-    ret
-    add		sp	2
-    ret
-
-f.dsp_set_height:
-    mov		r3	sp
-    add		r3	2
-    ld		$20737  r3
-    ret
-
-f.dsp_update:
-    ld		$20738  0
-    ret
-
-f.dsp_render:
-    ld		$20739  0
-    ret
-
-f.dsp_get_stroke:
-    sub		sp	2
-    mov		r3	sp
-    add		r3	6
-    ld		r0  r3
-    mov		r3	sp
-    add		r3	4
-    ld		r1  r3
-    mov		r3	sp
-    add		r3	0
-    st		r3  $20740
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	8
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
-    ret
-    add		sp	2
-    ret
-
-f.dsp_get_lastchar:
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    st		r3  $20741
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	4
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
-    ret
-    add		sp	2
-    ret
-
-f.gpu_clear:
-    mov		r3	sp
-    add		r3	2
-    ld		$30351  r3
-    ret
-
-f.gpu_rect:
-    mov		r3	sp
-    add		r3	10
-    ld		r0  r3
-    mov		r3	sp
-    add		r3	8
-    ld		r1  r3
-    mov		r3	sp
-    add		r3	6
-    ld		r2  r3
-    mov		r3	sp
-    add		r3	4
-    ld		r3  r3
-    mov		r3	sp
-    add		r3	2
-    ld		$30352  r3
-    ret
-
-f.gpu_line:
-    mov		r3	sp
-    add		r3	10
-    ld		r0  r3
-    mov		r3	sp
-    add		r3	8
-    ld		r1  r3
-    mov		r3	sp
-    add		r3	6
-    ld		r2  r3
-    mov		r3	sp
-    add		r3	6
-    ld		r3  r3
-    mov		r3	sp
-    add		r3	2
-    ld		$30353  r3
-    ret
-
-f.gpu_circle:
-    mov		r3	sp
-    add		r3	8
-    ld		r0  r3
-    mov		r3	sp
-    add		r3	6
-    ld		r1  r3
-    mov		r3	sp
-    add		r3	4
-    ld		r2  r3
-    mov		r3	sp
-    add		r3	2
-    ld		$30354  r3
-    ret
-
-f.gpu_rendercstrln:
-    mov		r3	sp
-    add		r3	6
-    ld		r0  r3
-    mov		r3	sp
-    add		r3	4
-    ld		r1  r3
-    mov		r3	sp
-    add		r3	2
-    ld		$30355  r3
-    ret
-
-f.shell_exe:
-    mov		r3	sp
-    add		r3	2
-    ld		$30479 r3
-    ret
-
-f.shell_render:
-    sub		sp	2
-    mov		r2	sp
-    add		r2	6
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    sub		sp	2
-    mov		r3	sp
-    add		r3	10
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    ld2		r3	r3
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov2	r0	10
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
-    add		sp	2
-    add		sp	2
-    add		sp	2
-    sub		sp	2
-    mov		r2	sp
-    add		r2	6
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld2		r2	r3
-    add2		r2	1
-    st2		r3	r2
-    add		sp	2
-    sub		sp	2
-    mov		r2	sp
-    add		r2	6
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    sub		sp	2
-    mov		r3	sp
-    add		r3	10
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    ld2		r3	r3
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov2	r0	36
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
-    add		sp	2
-    add		sp	2
-    add		sp	2
-    sub		sp	2
-    mov		r2	sp
-    add		r2	6
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld2		r2	r3
-    add2		r2	1
-    st2		r3	r2
-    add		sp	2
-    sub		sp	2
-    mov		r2	sp
-    add		r2	6
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    sub		sp	2
-    mov		r3	sp
-    add		r3	10
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    ld2		r3	r3
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov2	r0	32
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
-    add		sp	2
-    add		sp	2
-    add		sp	2
-    sub		sp	2
-    mov		r2	sp
-    add		r2	6
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld2		r2	r3
-    add2		r2	1
-    st2		r3	r2
-    add		sp	2
-    sub		sp	2
-    mov		r2	sp
-    add		r2	4
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	8
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    ld2		r3	r3
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
-    add		sp	2
-    ret
-
-f.shell_start:
+f.main:
     sub		sp	2
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	0
+    mov2		r2	10
     st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	0
-    st2		r3	r2
-    sub		sp	2
-    sub		sp	1000
-    mov		r0	sp
-    add		r0	1000
-    st		r0	sp
-    sub		sp	2
-    mov		r3	sp
-    add		r3	1002
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    sub		sp	2
-    mov		r0	sp
-    add		r0	1008
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    st2		r3	r0
-    add		sp	2
-    sub		sp	2
-    sub		sp	2
-    mov		r0	sp
-    add		r0	1012
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    st2		r3	r0
-    add		sp	2
-    call	f.shell_render
-    add		sp	2
-    add		sp	2
-    add		sp	2
     l.0_WHILE2_0:
     sub		sp	1
-    sub		sp	2
-    call	f.dsp_get_running
     sub		sp	1
     mov		r3	sp
-    add		r3	1
+    add		r3	2
     ld2		r0	r3
     sub2		r0	0
-    jnz		lcmp.0_TRUE
+    jp		lcmp.0_TRUE
     mov		r3	sp
     add		r3	0
     st1		r3	0
@@ -482,54 +63,24 @@ f.shell_start:
     add		r3	0
     ld1		r0	r3
     mov		r3	sp
-    add		r3	3
+    add		r3	1
     ld1		r2	r3
     mov1		r2	r0
     st1		r3	r2
     add		sp	1
-    add		sp	2
     mov		r3	sp
     add		r3	0
     ld1		r0	r3
     add		sp	1
     sub r0,0
     jz l.1_WHILE2_0
-    call	f.dsp_update
-    sub		sp	2
-    sub		sp	2
-    call	f.dsp_get_lastchar
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
+    sub		sp	1
+    sub		sp	1
     mov		r3	sp
     add		r3	2
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
-    sub		sp	1
-    sub		sp	2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	22
-    st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	2
-    st2		r3	r2
-    call	f.dsp_get_stroke
-    add		sp	2
-    add		sp	2
-    sub		sp	1
-    mov		r3	sp
-    add		r3	1
     ld2		r0	r3
-    sub2		r0	0
-    jnz		lcmp.2_TRUE
+    sub2		r0	10
+    jp		lcmp.2_TRUE
     mov		r3	sp
     add		r3	0
     st1		r3	0
@@ -543,12 +94,11 @@ f.shell_start:
     add		r3	0
     ld1		r0	r3
     mov		r3	sp
-    add		r3	3
+    add		r3	1
     ld1		r2	r3
     mov1		r2	r0
     st1		r3	r2
     add		sp	1
-    add		sp	2
     mov		r3	sp
     add		r3	0
     ld1		r0	r3
@@ -556,15 +106,20 @@ f.shell_start:
     sub r0,0
     jz l.1_IF3_0
     l.0_IF3_0:
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    st2		r3	GLOBAL.STR0
+    call	f.tty_print
+    add		sp	2
+    jmp		l.1_LOG3_0
+    l.1_IF3_0:
     sub		sp	1
     sub		sp	1
     mov		r3	sp
-    add		r3	1006
+    add		r3	2
     ld2		r0	r3
-    mov		r3	sp
-    add		r3	1008
-    ld2		r3	r3
-    sub2		r0	r3
+    sub2		r0	6
     jp		lcmp.4_TRUE
     mov		r3	sp
     add		r3	0
@@ -589,68 +144,23 @@ f.shell_start:
     ld1		r0	r3
     add		sp	1
     sub r0,0
-    jz l.1_IF4_0
-    l.0_IF4_0:
-    mov		r3	sp
-    add		r3	1004
-    ld2		r2	r3
-    sub2		r2	1
-    st2		r3	r2
+    jz l.1_ELIF3_0_1
+    l.0_ELIF3_0_1:
     sub		sp	2
     mov		r3	sp
-    add		r3	1004
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	1006
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
-    mov		r3	sp
     add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov2	r0	32
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
+    st2		r3	GLOBAL.STR1
+    call	f.tty_print
     add		sp	2
-    add		sp	2
-    l.1_LOG4_0:
-    l.1_IF4_0:
     jmp		l.1_LOG3_0
-    l.1_IF3_0:
+    l.1_ELIF3_0_1:
     sub		sp	1
-    sub		sp	2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	36
-    st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	2
-    st2		r3	r2
-    call	f.dsp_get_stroke
-    add		sp	2
-    add		sp	2
     sub		sp	1
     mov		r3	sp
-    add		r3	1
+    add		r3	2
     ld2		r0	r3
-    sub2		r0	0
-    jnz		lcmp.6_TRUE
+    sub2		r0	3
+    jp		lcmp.6_TRUE
     mov		r3	sp
     add		r3	0
     st1		r3	0
@@ -664,116 +174,33 @@ f.shell_start:
     add		r3	0
     ld1		r0	r3
     mov		r3	sp
-    add		r3	3
+    add		r3	1
     ld1		r2	r3
     mov1		r2	r0
     st1		r3	r2
     add		sp	1
-    add		sp	2
     mov		r3	sp
     add		r3	0
     ld1		r0	r3
     add		sp	1
     sub r0,0
-    jz l.1_ELIF3_0_1
-    l.0_ELIF3_0_1:
+    jz l.1_ELIF3_0_2
+    l.0_ELIF3_0_2:
     sub		sp	2
     mov		r3	sp
-    add		r3	1004
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	1006
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
-    mov		r3	sp
     add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	0
-    st1		r3	r2
-    add		sp	2
-    add		sp	2
-    sub		sp	2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	1006
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	1010
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    st2		r3	r0
-    add		sp	2
-    call	f.shell_exe
-    add		sp	2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	1004
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    sub		sp	2
-    mov		r0	sp
-    add		r0	1010
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    st2		r3	r0
-    add		sp	2
-    sub		sp	2
-    sub		sp	2
-    mov		r0	sp
-    add		r0	1014
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	2
-    st2		r3	r0
-    add		sp	2
-    call	f.shell_render
-    add		sp	2
-    add		sp	2
+    st2		r3	GLOBAL.STR2
+    call	f.tty_print
     add		sp	2
     jmp		l.1_LOG3_0
-    l.1_ELIF3_0_1:
+    l.1_ELIF3_0_2:
     sub		sp	1
     sub		sp	1
     mov		r3	sp
     add		r3	2
     ld2		r0	r3
     sub2		r0	0
-    jnz		lcmp.8_TRUE
+    jp		lcmp.8_TRUE
     mov		r3	sp
     add		r3	0
     st1		r3	0
@@ -797,107 +224,48 @@ f.shell_start:
     ld1		r0	r3
     add		sp	1
     sub r0,0
-    jz l.1_ELIF3_0_2
-    l.0_ELIF3_0_2:
+    jz l.1_ELIF3_0_3
+    l.0_ELIF3_0_3:
     sub		sp	2
     mov		r3	sp
-    add		r3	1004
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	1006
-    ld2		r3	r3
-    imul2		r3	1
-    add2		r0	r3
-    mov		r3	sp
     add		r3	0
-    st2		r3	r0
+    st2		r3	GLOBAL.STR3
+    call	f.tty_print
+    add		sp	2
+    jmp		l.1_LOG3_0
+    l.1_ELIF3_0_3:
+    l.0_ELSE3_0:
     sub		sp	2
-    mov		r2	sp
-    add		r2	2
-    mov		r1	sp
-    add		r1	0
-    ld		r0	r2
-    st		r1	r0
-    sub		sp	1
-    mov		r0	0
-    mov		r3	sp
-    add		r3	5
-    ld2		r0	r3
     mov		r3	sp
     add		r3	0
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
-    mov		r3	sp
-    add		r3	0
-    ld1		r0	r3
-    mov		r3	sp
-    add		r3	1
-    ld2		r3	r3
-    ld1		r2	r3
-    mov1		r2	r0
-    st1		r3	r2
-    add		sp	1
+    st2		r3	GLOBAL.STR4
+    call	f.tty_print
     add		sp	2
-    add		sp	2
-    mov		r3	sp
-    add		r3	1004
-    ld2		r2	r3
-    add2		r2	1
-    st2		r3	r2
     l.1_LOG3_0:
-    l.1_ELIF3_0_2:
-    sub		sp	2
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	0x0000
+    sub2		r2	1
     st2		r3	r2
-    call	f.gpu_clear
-    add		sp	2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	1004
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    sub		sp	2
-    mov		r3	sp
-    add		r3	1008
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	0xFFFF
-    st2		r3	r2
-    call	f.gpu_rendercstrln
-    add		sp	2
-    add		sp	2
-    add		sp	2
-    call	f.dsp_render
-    add		sp	2
     jmp		l.0_WHILE2_0
     l.1_WHILE2_0:
-    add		sp	2
-    add		sp	1000
-    add		sp	2
-    add		sp	2
-    ret
-
-f.main:
-    call	f.shell_start
     mov		r3	sp
-    add		r3	2
+    add		r3	4
     ld2		r2	r3
     mov2		r2	0
     st2		r3	r2
+    add		sp	2
     ret
+    add		sp	2
     ret
 
+GLOBAL.STR0:
+    byte "a > 10" 10 0
+GLOBAL.STR1:
+    byte "a > 6" 10 0
+GLOBAL.STR2:
+    byte "a > 3" 10 0
+GLOBAL.STR3:
+    byte "a > 0" 10 0
+GLOBAL.STR4:
+    byte "else" 10 0

@@ -26,7 +26,7 @@ int main(int argc,char** argv){
     //    printf("Missing Output File .asm/s!\n");
     //    return 1;
     //}
-
+    
     VM16 vm = VM16_New();
     VM16_ConnectDevice(&vm,(VM16_Ram[]){    VM16_Ram_New(VM16_MEMORY_LOW,   VM16_MEMORY_HIGH)   });
     VM16_ConnectDevice(&vm,(VM16_Kernel[]){ VM16_Kernel_New(VM16_KERNEL_LOW,VM16_KERNEL_HIGH)   });

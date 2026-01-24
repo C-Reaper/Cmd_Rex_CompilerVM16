@@ -9,6 +9,8 @@ define DSP_STROKE_W          25;
 define DSP_STROKE_S          39;
 define DSP_STROKE_A          38;
 define DSP_STROKE_D          40;
+define DSP_STROKE_UP         111;
+define DSP_STROKE_DOWN       116;
 
 define DSP_STATE_NONE        0;
 define DSP_STATE_DOWN        1;
