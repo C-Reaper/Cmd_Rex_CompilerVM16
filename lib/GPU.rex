@@ -29,8 +29,15 @@ void gpu_circle(u16 x,u16 y,u16 r,u16 color){
     asm "ld		r2  " r;
     asm "ld		$30354  " color;
 }
+void gpu_cstr(u8* buff,u16 len,u16 x,u16 y,u16 color){
+    u16 reg0 = y;
+    asm "ld		r0  " buff;
+    asm "ld		r1  " len;
+    asm "ld		r2  " x;
+    asm "ld		$30355  " color;
+}
 void gpu_rendercstrln(u8* buff,u16 len,u16 color){
     asm "ld		r0  " buff;
     asm "ld		r1  " len;
-    asm "ld		$30355  " color;
+    asm "ld		$30356  " color;
 }

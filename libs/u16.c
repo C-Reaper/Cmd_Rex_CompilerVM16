@@ -22,12 +22,12 @@ Token U16_U16_Handler_Asu(RexLang* ll,Token* op,Vector* args){
 Token U16_U16_Handler_Asm(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_ExecuteAss(ll,a,b,op,"imul","ASM");
+    return RexLang_ExecuteAss(ll,a,b,op,"mul","ASM");
 }
 Token U16_U16_Handler_Asv(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_ExecuteAss(ll,a,b,op,"idiv","ASV");
+    return RexLang_ExecuteAss(ll,a,b,op,"div","ASV");
 }
 
 Token U16_U16_Handler_Add(RexLang* ll,Token* op,Vector* args){
@@ -43,18 +43,18 @@ Token U16_U16_Handler_Sub(RexLang* ll,Token* op,Vector* args){
 Token U16_U16_Handler_Mul(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_Execute(ll,a,b,op,"imul","IMUL",RexLang_Function_Mul);
+    return RexLang_Execute(ll,a,b,op,"mul","MUL",RexLang_Function_Mul);
 }
 Token U16_U16_Handler_Div(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_Execute(ll,a,b,op,"idiv","IDIV",RexLang_Function_Div);
+    return RexLang_Execute(ll,a,b,op,"div","DIV",RexLang_Function_Div);
 }
 
 Token U16_U16_Handler_Mod(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     Token* b = (Token*)Vector_Get(args,1);
-    return RexLang_Execute(ll,a,b,op,"imod","IMOD",RexLang_Function_Mod);
+    return RexLang_Execute(ll,a,b,op,"mod","IMOD",RexLang_Function_Mod);
 }
 
 Token U16_Handler_Neg(RexLang* ll,Token* op,Vector* args){

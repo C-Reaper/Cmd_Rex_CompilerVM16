@@ -1,6 +1,8 @@
 import Kernel;
 import Display;
 import GPU;
+import CStr;
+import Stream;
 
 u16 main(){
     i16 p1_x = 0;
@@ -15,7 +17,7 @@ u16 main(){
 
     i16 ball_x = 6000;
     i16 ball_y = 4000;
-    i16 ball_r = 400;
+    i16 ball_r = 200;
     i16 ball_vx = 6;
     i16 ball_vy = 6;
 
@@ -46,11 +48,11 @@ u16 main(){
         if p2_y < 0 {
             p2_y = 0;
         }
-        if p1_y > 8000 {
-            p1_y = 8000;
+        if p1_y > 8000 - p1_h {
+            p1_y = 8000 - p1_h;
         }
-        if p2_y > 8000 {
-            p2_y = 8000;
+        if p2_y > 8000 - p2_h {
+            p2_y = 8000 - p2_h;
         }
 
         ball_x += ball_vx;
@@ -63,9 +65,10 @@ u16 main(){
             ball_vy = 6;
             score2 += 1;
         }
-        if ball_y < 0 {
-            ball_y = 0;
+        if ball_y < ball_r {
+            ball_y = ball_r;
             ball_vy = -ball_vy;
+            ball_vy = ball_vy + ball_vy / 4;
         }
         if ball_x > 12000 {
             ball_x = 6000;
@@ -74,21 +77,31 @@ u16 main(){
             ball_vy = 6;
             score1 += 1;
         }
-        if ball_y > 8000 {
-            ball_y = 8000;
+        if ball_y > 8000 - ball_r {
+            ball_y = 8000 - ball_r;
             ball_vy = -ball_vy;
+            ball_vy = ball_vy + ball_vy / 4;
         }
 
         if ball_y + ball_r >= p1_y && ball_y - ball_r < p1_y + p1_h && ball_x + ball_r >= p1_x && ball_x - ball_r < p1_x + p1_w {
+            ball_x = p1_x + p1_w + ball_r;
             ball_vx = -ball_vx;
             ball_vx = ball_vx + ball_vx / 2;
         }
         if ball_y + ball_r >= p2_y && ball_y - ball_r < p2_y + p1_h && ball_x + ball_r >= p2_x && ball_x - ball_r < p2_x + p2_w {
+            ball_x = p2_x - ball_r;
             ball_vx = -ball_vx;
             ball_vx = ball_vx + ball_vx / 2;
         }
 
         gpu_clear(GPU_BLACK);
+
+        i8[32] buffer;
+        cstr::set(buffer,0,32);
+        stream::p_u16(buffer,score1);
+        stream::p_cstr(buffer," : ");
+        stream::p_u16(buffer,score2);
+        gpu_cstr(buffer,cstr::len(buffer),40,0,GPU_WHITE);
 
         gpu_circle(ball_x / 100,ball_y / 100,ball_r / 100,GPU_WHITE);
         gpu_rect(p1_x / 100,p1_y / 100,p1_w / 100,p1_h / 100,GPU_RED);
