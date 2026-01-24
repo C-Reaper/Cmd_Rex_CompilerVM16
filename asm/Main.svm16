@@ -11,28 +11,16 @@ global _start:
     add		sp	2
     mov		$0	r0
 
-f.tty_print:
+f.kernel_exit:
     mov		r3	sp
     add		r3	2
-    ld		$20480 r3
+    ld		$0  r3
     ret
 
-f.tty_print_i16:
+f.kernel_sleep:
     mov		r3	sp
     add		r3	2
-    ld		$20481 r3
-    ret
-
-f.tty_print_hex:
-    mov		r3	sp
-    add		r3	2
-    ld		$20482 r3
-    ret
-
-f.tty_get:
-    mov		r3	sp
-    add		r3	2
-    ld		$20483 r3
+    ld		$1  r3
     ret
 
 f.dsp_get_running:
@@ -245,6 +233,54 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	500
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	1500
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	11500
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	500
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	1500
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
     mov2		r2	6000
     st2		r3	r2
     sub		sp	2
@@ -263,16 +299,28 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	4
+    mov2		r2	6
     st2		r3	r2
     sub		sp	2
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	4
+    mov2		r2	6
     st2		r3	r2
     sub		sp	2
     sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
     l.0_WHILE2_0:
     sub		sp	1
     sub		sp	2
@@ -306,7 +354,7 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_WHILE2_0
     call	f.dsp_update
     sub		sp	1
@@ -355,13 +403,13 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_IF3_0
     l.0_IF3_0:
     mov		r3	sp
-    add		r3	10
+    add		r3	30
     ld2		r2	r3
-    sub2		r2	5
+    sub2		r2	20
     st2		r3	r2
     l.1_LOG3_0:
     l.1_IF3_0:
@@ -411,13 +459,13 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_IF3_1
     l.0_IF3_1:
     mov		r3	sp
-    add		r3	10
+    add		r3	30
     ld2		r2	r3
-    add2		r2	5
+    add2		r2	20
     st2		r3	r2
     l.1_LOG3_1:
     l.1_IF3_1:
@@ -427,7 +475,7 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	38
+    mov2		r2	111
     st2		r3	r2
     sub		sp	2
     mov		r3	sp
@@ -467,13 +515,13 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_IF3_2
     l.0_IF3_2:
     mov		r3	sp
-    add		r3	12
+    add		r3	22
     ld2		r2	r3
-    sub2		r2	5
+    sub2		r2	20
     st2		r3	r2
     l.1_LOG3_2:
     l.1_IF3_2:
@@ -483,7 +531,7 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	40
+    mov2		r2	116
     st2		r3	r2
     sub		sp	2
     mov		r3	sp
@@ -523,38 +571,22 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_IF3_3
     l.0_IF3_3:
     mov		r3	sp
-    add		r3	12
+    add		r3	22
     ld2		r2	r3
-    add2		r2	5
+    add2		r2	20
     st2		r3	r2
     l.1_LOG3_3:
     l.1_IF3_3:
-    mov		r3	sp
-    add		r3	6
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	12
-    ld2		r2	r3
-    add2		r2	r0
-    st2		r3	r2
-    mov		r3	sp
-    add		r3	4
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	10
-    ld2		r2	r3
-    add2		r2	r0
-    st2		r3	r2
     sub		sp	1
     sub		sp	1
     mov		r3	sp
-    add		r3	14
+    add		r3	32
     ld2		r0	r3
-    cmp2		r0	6000
+    cmp2		r0	0
     jn		lcmp.10_TRUE
     mov		r3	sp
     add		r3	0
@@ -578,39 +610,22 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_IF3_4
     l.0_IF3_4:
     mov		r3	sp
-    add		r3	12
+    add		r3	30
     ld2		r2	r3
-    mov2		r2	6000
+    mov2		r2	0
     st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	8
-    ld2		r0	r3
-    neg		r0
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	8
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
     l.1_LOG3_4:
     l.1_IF3_4:
     sub		sp	1
     sub		sp	1
     mov		r3	sp
-    add		r3	12
+    add		r3	24
     ld2		r0	r3
-    cmp2		r0	4000
+    cmp2		r0	0
     jn		lcmp.12_TRUE
     mov		r3	sp
     add		r3	0
@@ -634,39 +649,22 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_IF3_5
     l.0_IF3_5:
     mov		r3	sp
-    add		r3	10
+    add		r3	22
     ld2		r2	r3
-    mov2		r2	4000
+    mov2		r2	0
     st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	6
-    ld2		r0	r3
-    neg		r0
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	6
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
     l.1_LOG3_5:
     l.1_IF3_5:
     sub		sp	1
     sub		sp	1
     mov		r3	sp
-    add		r3	14
+    add		r3	32
     ld2		r0	r3
-    cmp2		r0	12000
+    cmp2		r0	8000
     jp		lcmp.14_TRUE
     mov		r3	sp
     add		r3	0
@@ -690,37 +688,20 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_IF3_6
     l.0_IF3_6:
     mov		r3	sp
-    add		r3	12
+    add		r3	30
     ld2		r2	r3
-    mov2		r2	12000
+    mov2		r2	8000
     st2		r3	r2
-    sub		sp	2
-    mov		r3	sp
-    add		r3	8
-    ld2		r0	r3
-    neg		r0
-    mov		r3	sp
-    add		r3	0
-    st2		r3	r0
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	8
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
     l.1_LOG3_6:
     l.1_IF3_6:
     sub		sp	1
     sub		sp	1
     mov		r3	sp
-    add		r3	12
+    add		r3	24
     ld2		r0	r3
     cmp2		r0	8000
     jp		lcmp.16_TRUE
@@ -746,17 +727,131 @@ f.main:
     add		r3	0
     ld1		r0	r3
     add		sp	1
-    sub		r0	1
+    cmp1		r0	1
     jnz		l.1_IF3_7
     l.0_IF3_7:
     mov		r3	sp
-    add		r3	10
+    add		r3	22
     ld2		r2	r3
     mov2		r2	8000
     st2		r3	r2
+    l.1_LOG3_7:
+    l.1_IF3_7:
+    mov		r3	sp
+    add		r3	10
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	16
+    ld2		r2	r3
+    add2		r2	r0
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	8
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	14
+    ld2		r2	r3
+    add2		r2	r0
+    st2		r3	r2
+    sub		sp	1
+    sub		sp	1
+    mov		r3	sp
+    add		r3	18
+    ld2		r0	r3
+    cmp2		r0	0
+    jn		lcmp.18_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.19_END
+    lcmp.18_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.19_END:
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	1
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    add		sp	1
+    cmp1		r0	1
+    jnz		l.1_IF3_8
+    l.0_IF3_8:
+    mov		r3	sp
+    add		r3	16
+    ld2		r2	r3
+    mov2		r2	6000
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	14
+    ld2		r2	r3
+    mov2		r2	4000
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	10
+    ld2		r2	r3
+    mov2		r2	6
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	8
+    ld2		r2	r3
+    mov2		r2	6
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    add2		r2	1
+    st2		r3	r2
+    l.1_LOG3_8:
+    l.1_IF3_8:
+    sub		sp	1
+    sub		sp	1
+    mov		r3	sp
+    add		r3	16
+    ld2		r0	r3
+    cmp2		r0	0
+    jn		lcmp.20_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.21_END
+    lcmp.20_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.21_END:
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	1
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    add		sp	1
+    cmp1		r0	1
+    jnz		l.1_IF3_9
+    l.0_IF3_9:
+    mov		r3	sp
+    add		r3	14
+    ld2		r2	r3
+    mov2		r2	0
+    st2		r3	r2
     sub		sp	2
     mov		r3	sp
-    add		r3	6
+    add		r3	10
     ld2		r0	r3
     neg		r0
     mov		r3	sp
@@ -766,13 +861,624 @@ f.main:
     add		r3	0
     ld2		r0	r3
     mov		r3	sp
-    add		r3	6
+    add		r3	10
     ld2		r2	r3
     mov2		r2	r0
     st2		r3	r2
     add		sp	2
-    l.1_LOG3_7:
-    l.1_IF3_7:
+    l.1_LOG3_9:
+    l.1_IF3_9:
+    sub		sp	1
+    sub		sp	1
+    mov		r3	sp
+    add		r3	18
+    ld2		r0	r3
+    cmp2		r0	12000
+    jp		lcmp.22_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.23_END
+    lcmp.22_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.23_END:
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	1
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    add		sp	1
+    cmp1		r0	1
+    jnz		l.1_IF3_10
+    l.0_IF3_10:
+    mov		r3	sp
+    add		r3	16
+    ld2		r2	r3
+    mov2		r2	6000
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	14
+    ld2		r2	r3
+    mov2		r2	4000
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	10
+    ld2		r2	r3
+    mov2		r2	6
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	8
+    ld2		r2	r3
+    mov2		r2	6
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    add2		r2	1
+    st2		r3	r2
+    l.1_LOG3_10:
+    l.1_IF3_10:
+    sub		sp	1
+    sub		sp	1
+    mov		r3	sp
+    add		r3	16
+    ld2		r0	r3
+    cmp2		r0	8000
+    jp		lcmp.24_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.25_END
+    lcmp.24_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.25_END:
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	1
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    add		sp	1
+    cmp1		r0	1
+    jnz		l.1_IF3_11
+    l.0_IF3_11:
+    mov		r3	sp
+    add		r3	14
+    ld2		r2	r3
+    mov2		r2	8000
+    st2		r3	r2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	10
+    ld2		r0	r3
+    neg		r0
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	10
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    l.1_LOG3_11:
+    l.1_IF3_11:
+    sub		sp	1
+    sub		sp	2
+    mov		r3	sp
+    add		r3	17
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	15
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	1
+    mov		r3	sp
+    add		r3	1
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	34
+    ld2		r3	r3
+    cmp2		r0	r3
+    jzp		lcmp.26_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.27_END
+    lcmp.26_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.27_END:
+    sub		sp	2
+    mov		r3	sp
+    add		r3	20
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	18
+    ld2		r3	r3
+    sub2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	38
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	34
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	1
+    mov		r3	sp
+    add		r3	3
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld2		r3	r3
+    cmp2		r0	r3
+    jn		lcmp.28_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.29_END
+    lcmp.28_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.29_END:
+    sub		sp	1
+    mov		r3	sp
+    add		r3	6
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r3	r3
+    and1		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st1		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	28
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	24
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	1
+    mov		r3	sp
+    add		r3	1
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	45
+    ld2		r3	r3
+    cmp2		r0	r3
+    jzp		lcmp.30_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.31_END
+    lcmp.30_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.31_END:
+    sub		sp	1
+    mov		r3	sp
+    add		r3	4
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r3	r3
+    and1		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st1		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	32
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	28
+    ld2		r3	r3
+    sub2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	50
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	46
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	1
+    mov		r3	sp
+    add		r3	3
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld2		r3	r3
+    cmp2		r0	r3
+    jn		lcmp.32_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.33_END
+    lcmp.32_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.33_END:
+    sub		sp	1
+    mov		r3	sp
+    add		r3	6
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r3	r3
+    and1		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st1		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	19
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	1
+    add		sp	1
+    add		sp	2
+    add		sp	2
+    add		sp	1
+    add		sp	1
+    add		sp	2
+    add		sp	1
+    add		sp	1
+    add		sp	2
+    add		sp	2
+    add		sp	1
+    add		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    add		sp	1
+    cmp1		r0	1
+    jnz		l.1_IF3_12
+    l.0_IF3_12:
+    sub		sp	2
+    mov		r3	sp
+    add		r3	12
+    ld2		r0	r3
+    neg		r0
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	12
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	12
+    ld2		r0	r3
+    idiv2		r0	2
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	14
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	14
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    add		sp	2
+    l.1_LOG3_12:
+    l.1_IF3_12:
+    sub		sp	1
+    sub		sp	2
+    mov		r3	sp
+    add		r3	17
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	15
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	1
+    mov		r3	sp
+    add		r3	1
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	26
+    ld2		r3	r3
+    cmp2		r0	r3
+    jzp		lcmp.34_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.35_END
+    lcmp.34_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.35_END:
+    sub		sp	2
+    mov		r3	sp
+    add		r3	20
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	18
+    ld2		r3	r3
+    sub2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	30
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	34
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	1
+    mov		r3	sp
+    add		r3	3
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld2		r3	r3
+    cmp2		r0	r3
+    jn		lcmp.36_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.37_END
+    lcmp.36_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.37_END:
+    sub		sp	1
+    mov		r3	sp
+    add		r3	6
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r3	r3
+    and1		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st1		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	28
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	24
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	1
+    mov		r3	sp
+    add		r3	1
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	37
+    ld2		r3	r3
+    cmp2		r0	r3
+    jzp		lcmp.38_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.39_END
+    lcmp.38_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.39_END:
+    sub		sp	1
+    mov		r3	sp
+    add		r3	4
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r3	r3
+    and1		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st1		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	32
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	28
+    ld2		r3	r3
+    sub2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	42
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	38
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	1
+    mov		r3	sp
+    add		r3	3
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld2		r3	r3
+    cmp2		r0	r3
+    jn		lcmp.40_TRUE
+    mov		r3	sp
+    add		r3	0
+    st1		r3	0
+    jmp		lcmp.41_END
+    lcmp.40_TRUE:
+    mov		r3	sp
+    add		r3	0
+    st1		r3	1
+    lcmp.41_END:
+    sub		sp	1
+    mov		r3	sp
+    add		r3	6
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	1
+    ld1		r3	r3
+    and1		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st1		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    mov		r3	sp
+    add		r3	19
+    ld1		r2	r3
+    mov1		r2	r0
+    st1		r3	r2
+    add		sp	1
+    add		sp	1
+    add		sp	2
+    add		sp	2
+    add		sp	1
+    add		sp	1
+    add		sp	2
+    add		sp	1
+    add		sp	1
+    add		sp	2
+    add		sp	2
+    add		sp	1
+    add		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld1		r0	r3
+    add		sp	1
+    cmp1		r0	1
+    jnz		l.1_IF3_13
+    l.0_IF3_13:
+    sub		sp	2
+    mov		r3	sp
+    add		r3	12
+    ld2		r0	r3
+    neg		r0
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	12
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	12
+    ld2		r0	r3
+    idiv2		r0	2
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    sub		sp	2
+    mov		r3	sp
+    add		r3	14
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r3	r3
+    add2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	14
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    add		sp	2
+    l.1_LOG3_13:
+    l.1_IF3_13:
     sub		sp	2
     mov		r3	sp
     add		r3	0
@@ -784,7 +1490,7 @@ f.main:
     sub		sp	2
     sub		sp	2
     mov		r3	sp
-    add		r3	16
+    add		r3	20
     ld2		r0	r3
     idiv2		r0	100
     mov		r3	sp
@@ -802,7 +1508,7 @@ f.main:
     sub		sp	2
     sub		sp	2
     mov		r3	sp
-    add		r3	16
+    add		r3	20
     ld2		r0	r3
     idiv2		r0	100
     mov		r3	sp
@@ -820,7 +1526,7 @@ f.main:
     sub		sp	2
     sub		sp	2
     mov		r3	sp
-    add		r3	16
+    add		r3	20
     ld2		r0	r3
     idiv2		r0	100
     mov		r3	sp
@@ -846,11 +1552,179 @@ f.main:
     add		sp	2
     add		sp	2
     add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	36
+    ld2		r0	r3
+    idiv2		r0	100
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	36
+    ld2		r0	r3
+    idiv2		r0	100
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	36
+    ld2		r0	r3
+    idiv2		r0	100
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	36
+    ld2		r0	r3
+    idiv2		r0	100
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0xF000
+    st2		r3	r2
+    call	f.gpu_rect
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	28
+    ld2		r0	r3
+    idiv2		r0	100
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	28
+    ld2		r0	r3
+    idiv2		r0	100
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	28
+    ld2		r0	r3
+    idiv2		r0	100
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	28
+    ld2		r0	r3
+    idiv2		r0	100
+    mov		r3	sp
+    add		r3	0
+    st2		r3	r0
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	2
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	0x000F
+    st2		r3	r2
+    call	f.gpu_rect
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
     call	f.dsp_render
     jmp		l.0_WHILE2_0
     l.1_WHILE2_0:
     mov		r3	sp
-    add		r3	16
+    add		r3	36
     ld2		r2	r3
     mov2		r2	0
     st2		r3	r2
@@ -861,7 +1735,27 @@ f.main:
     add		sp	2
     add		sp	2
     add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
     ret
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
+    add		sp	2
     add		sp	2
     add		sp	2
     add		sp	2

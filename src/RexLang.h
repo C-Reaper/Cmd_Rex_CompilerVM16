@@ -571,7 +571,7 @@ Boolean RexLang_If(RexLang* ll,TokenMap* tm){
 
                 CStr nextlabel = RexLang_Logic(ll,0,RexLang_IF,ll->ev.sc.range);
                 CStr otherlabel = RexLang_Logic(ll,1,RexLang_IF,ll->ev.sc.range);
-                RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t%s\t1",RexLang_REG_A);
+                RexLang_Indentation_Appendf(ll,&ll->text,"cmp1\t\t%s\t1",RexLang_REG_A);
                 RexLang_Indentation_Appendf(ll,&ll->text,"jnz\t\t%s",otherlabel);
                 RexLang_Indentation_Appendf(ll,&ll->text,"%s:",nextlabel);
                 CStr_Free(&otherlabel);
@@ -624,7 +624,7 @@ Boolean RexLang_Elif(RexLang* ll,TokenMap* tm){
 
                 CStr nextlabel = RexLang_Logic(ll,0,RexLang_ELIF,ll->ev.sc.range);
                 CStr otherlabel = RexLang_Logic(ll,1,RexLang_ELIF,ll->ev.sc.range);
-                RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t%s\t1",RexLang_REG_A);
+                RexLang_Indentation_Appendf(ll,&ll->text,"cmp1\t\t%s\t1",RexLang_REG_A);
                 RexLang_Indentation_Appendf(ll,&ll->text,"jnz\t\t%s",otherlabel);
                 RexLang_Indentation_Appendf(ll,&ll->text,"%s:",nextlabel);
                 CStr_Free(&otherlabel);
@@ -714,7 +714,7 @@ Boolean RexLang_While(RexLang* ll,TokenMap* tm){
                 Scope_DestroyVariable(&ll->ev.sc,btok.str);
                 Token_Free(&btok);
 
-                RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t%s\t1",RexLang_REG_A);
+                RexLang_Indentation_Appendf(ll,&ll->text,"cmp1\t\t%s\t1",RexLang_REG_A);
                 RexLang_Indentation_Appendf(ll,&ll->text,"jnz\t\t%s",otherlabel);
                 CStr_Free(&otherlabel);
                 CStr_Free(&nextlabel);
@@ -779,7 +779,7 @@ Boolean RexLang_For(RexLang* ll,TokenMap* tm){
                     Scope_DestroyVariable(&ll->ev.sc,btok.str);
                     Token_Free(&btok); 
 
-                    RexLang_Indentation_Appendf(ll,&ll->text,"sub\t\t%s\t1",RexLang_REG_A);
+                    RexLang_Indentation_Appendf(ll,&ll->text,"cmp1\t\t%s\t1",RexLang_REG_A);
                     RexLang_Indentation_Appendf(ll,&ll->text,"jnz\t\t%s",otherlabel);
                 }
                 TokenMap_Free(&statement_1);
