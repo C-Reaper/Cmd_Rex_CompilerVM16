@@ -1,6 +1,7 @@
 import Kernel;
 import Display;
 import GPU;
+import PS4C;
 import CStr;
 import Stream;
 
@@ -29,19 +30,22 @@ u16 main(){
 
     while dsp_get_running() != 0 {
         dsp_update();
+        ps4c_update();
 
-        if dsp_get_stroke(DSP_STROKE_W,DSP_STATE_DOWN) != 0 {
+        i16 abs = ps4c_get_abs(PS4C_HAT0Y);
+        if abs == 0 || dsp_get_stroke(DSP_STROKE_W,DSP_STATE_DOWN) != 0 {
             p1_y -= 20;
         }
-        if dsp_get_stroke(DSP_STROKE_S,DSP_STATE_DOWN) != 0 {
+        if abs == 2 || dsp_get_stroke(DSP_STROKE_S,DSP_STATE_DOWN) != 0 {
             p1_y += 20;
         }
-        if dsp_get_stroke(DSP_STROKE_UP,DSP_STATE_DOWN) != 0 {
+        if ps4c_get_stroke(PS4C_TRI,PS4C_STATE_DOWN) != 0 || dsp_get_stroke(DSP_STROKE_UP,DSP_STATE_DOWN) != 0 {
             p2_y -= 20;
         }
-        if dsp_get_stroke(DSP_STROKE_DOWN,DSP_STATE_DOWN) != 0 {
+        if ps4c_get_stroke(PS4C_X,PS4C_STATE_DOWN) != 0 || dsp_get_stroke(DSP_STROKE_DOWN,DSP_STATE_DOWN) != 0 {
             p2_y += 20;
         }
+        
         if p1_y < 0 {
             p1_y = 0;
         }
