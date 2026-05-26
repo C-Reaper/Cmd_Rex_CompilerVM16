@@ -27,7 +27,7 @@ f.dsp_get_running:
     sub		sp	2
     mov		r3	sp
     add		r3	0
-    st		r3  $20735
+    st		r3  $20736
     mov		r3	sp
     add		r3	0
     ld2		r0	r3
@@ -44,34 +44,10 @@ f.dsp_get_running:
 f.dsp_set_running:
     mov		r3	sp
     add		r3	2
-    ld		$20735  r3
-    ret
-
-f.dsp_get_width:
-    sub		sp	2
-    mov		r3	sp
-    add		r3	0
-    st		r3  $20736
-    mov		r3	sp
-    add		r3	0
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	4
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    add		sp	2
-    ret
-    add		sp	2
-    ret
-
-f.dsp_set_width:
-    mov		r3	sp
-    add		r3	2
     ld		$20736  r3
     ret
 
-f.dsp_get_height:
+f.dsp_get_width:
     sub		sp	2
     mov		r3	sp
     add		r3	0
@@ -89,18 +65,42 @@ f.dsp_get_height:
     add		sp	2
     ret
 
-f.dsp_set_height:
+f.dsp_set_width:
     mov		r3	sp
     add		r3	2
     ld		$20737  r3
     ret
 
+f.dsp_get_height:
+    sub		sp	2
+    mov		r3	sp
+    add		r3	0
+    st		r3  $20738
+    mov		r3	sp
+    add		r3	0
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	4
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    add		sp	2
+    ret
+    add		sp	2
+    ret
+
+f.dsp_set_height:
+    mov		r3	sp
+    add		r3	2
+    ld		$20738  r3
+    ret
+
 f.dsp_update:
-    ld		$20738  0
+    ld		$20739  0
     ret
 
 f.dsp_render:
-    ld		$20739  0
+    ld		$20740  0
     ret
 
 f.dsp_get_stroke:
@@ -113,7 +113,7 @@ f.dsp_get_stroke:
     ld		r1  r3
     mov		r3	sp
     add		r3	0
-    st		r3  $20740
+    st		r3  $20741
     mov		r3	sp
     add		r3	0
     ld2		r0	r3
@@ -131,7 +131,7 @@ f.dsp_get_lastchar:
     sub		sp	2
     mov		r3	sp
     add		r3	0
-    st		r3  $20741
+    st		r3  $20742
     mov		r3	sp
     add		r3	0
     ld2		r0	r3
@@ -148,35 +148,10 @@ f.dsp_get_lastchar:
 f.gpu_clear:
     mov		r3	sp
     add		r3	2
-    ld		$30351  r3
+    ld		$30352  r3
     ret
 
 f.gpu_rect:
-    sub		sp	2
-    mov		r3	sp
-    add		r3	6
-    ld2		r0	r3
-    mov		r3	sp
-    add		r3	0
-    ld2		r2	r3
-    mov2		r2	r0
-    st2		r3	r2
-    mov		r3	sp
-    add		r3	12
-    ld		r0  r3
-    mov		r3	sp
-    add		r3	10
-    ld		r1  r3
-    mov		r3	sp
-    add		r3	8
-    ld		r2  r3
-    mov		r3	sp
-    add		r3	4
-    ld		$30352  r3
-    add		sp	2
-    ret
-
-f.gpu_line:
     sub		sp	2
     mov		r3	sp
     add		r3	6
@@ -201,6 +176,31 @@ f.gpu_line:
     add		sp	2
     ret
 
+f.gpu_line:
+    sub		sp	2
+    mov		r3	sp
+    add		r3	6
+    ld2		r0	r3
+    mov		r3	sp
+    add		r3	0
+    ld2		r2	r3
+    mov2		r2	r0
+    st2		r3	r2
+    mov		r3	sp
+    add		r3	12
+    ld		r0  r3
+    mov		r3	sp
+    add		r3	10
+    ld		r1  r3
+    mov		r3	sp
+    add		r3	8
+    ld		r2  r3
+    mov		r3	sp
+    add		r3	4
+    ld		$30354  r3
+    add		sp	2
+    ret
+
 f.gpu_circle:
     mov		r3	sp
     add		r3	8
@@ -213,7 +213,7 @@ f.gpu_circle:
     ld		r2  r3
     mov		r3	sp
     add		r3	2
-    ld		$30354  r3
+    ld		$30355  r3
     ret
 
 f.gpu_cstr:
@@ -237,7 +237,7 @@ f.gpu_cstr:
     ld		r2  r3
     mov		r3	sp
     add		r3	4
-    ld		$30355  r3
+    ld		$30356  r3
     add		sp	2
     ret
 
@@ -250,7 +250,7 @@ f.gpu_rendercstrln:
     ld		r1  r3
     mov		r3	sp
     add		r3	2
-    ld		$30356  r3
+    ld		$30357  r3
     ret
 
 f.ps4c_get_running:

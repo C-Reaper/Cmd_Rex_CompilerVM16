@@ -40,7 +40,7 @@ int main(int argc,char** argv){
     
     VM16_Comp(&vm,PATH_ASM,PATH_LINK);
     VM16_Link(&vm,VM16_MEMORY_LOW,"_start",(CStr[]){ PATH_LINK,NULL },PATH_EXE);
-    VM16_Load(&vm,VM16_MEMORY_LOW,"./asm/Main.vm16");
+    VM16_Load(&vm,VM16_MEMORY_LOW,PATH_EXE);
     VM16_Run(&vm,VM16_MEMORY_LOW);
 
     printf("Exitcode: %d\n",vm.exitcode);

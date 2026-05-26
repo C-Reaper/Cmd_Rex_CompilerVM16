@@ -20,44 +20,47 @@ define DSP_STATE_REPEAT      4;
 
 u16 dsp_get_running(){
     u16 running;
-    asm "st		" running "  $20735";
+    asm "st		" running "  $20736";
     return running;
 }
 void dsp_set_running(u16 running){
-    asm "ld		$20735  " running;
+    asm "ld		$20736  " running;
 }
+
 u16 dsp_get_width(){
     u16 width;
-    asm "st		" width "  $20736";
+    asm "st		" width "  $20737";
     return width;
 }
 void dsp_set_width(u16 width){
-    asm "ld		$20736  " width;
+    asm "ld		$20737  " width;
 }
+
 u16 dsp_get_height(){
     u16 height;
-    asm "st		" height "  $20737";
+    asm "st		" height "  $20738";
     return height;
 }
 void dsp_set_height(u16 height){
-    asm "ld		$20737  " height;
+    asm "ld		$20738  " height;
 }
+
 void dsp_update(){
-    asm "ld		$20738  0";
+    asm "ld		$20739  0";
 }
 void dsp_render(){
-    asm "ld		$20739  0";
+    asm "ld		$20740  0";
 }
 
 u16 dsp_get_stroke(u16 stroke,u16 state){
     u16 value;
     asm "ld		r0  " stroke;
     asm "ld		r1  " state;
-    asm "st		" value "  $20740";
+    asm "st		" value "  $20741";
     return value;
 }
 u16 dsp_get_lastchar(){
     u16 value;
-    asm "st		" value "  $20741";
+    asm "st		" value "  $20742";
     return value;
 }

@@ -17,10 +17,10 @@ alldebug:
 	$(CC) -g $(CFLAGS) $(INCLUDES) ./$(SRC_DIR)/Main.c -o ./$(TARGET) $(LDFLAGS) 
 
 debug:
-	WINEPREFIX=~/wine64 WINEARCH=win64 winedbg $(TARGET) ./code/Main.rex ./asm/Main.asm
+	WINEPREFIX=~/wine64 WINEARCH=win64 winedbg $(TARGET)
 
 exe: $(TARGET)
-	WINEPREFIX=~/wine64 WINEARCH=win64 wine $(TARGET) ./code/Main.rex ./asm/Main.asm
+	WINEPREFIX=~/wine64 WINEARCH=win64 wine $(TARGET)
 
 comp:
 	echo "Compiler Target Platform is Linux!"
