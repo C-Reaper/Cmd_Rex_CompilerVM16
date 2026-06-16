@@ -162,7 +162,7 @@ int RexLang_Size(RexLang* ll,CStr name){
                 TokenMap_Free(&args);
                 Token_Free(&op);
             
-                Number size = Number_Parse(Item.str);
+                Number size = Item.v_i64;
                 Token_Free(&Item);
                 return size;
             }
@@ -796,7 +796,7 @@ Boolean RexLang_Extract(RexLang* ll,Token* a,Number* n){
     if(a->tt==TOKEN_STRING){
         return False;
     }else if(a->tt==TOKEN_NUMBER){
-        *n = Number_Parse(a->str);
+        *n = a->v_i64;
         return True;
     }else{
         Compiler_ErrorHandler(&ll->ev,"Number -> 1. Arg: %s is not a int type!",a->str);
@@ -807,7 +807,7 @@ Boolean RexLang_ExtractBool(RexLang* ll,Token* a,Boolean* b){
     if(a->tt==TOKEN_STRING){
         return False;
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
-        *b = Boolean_Parse(a->str);
+        *b = a->v_b1;
         return True;
     }else{
         Compiler_ErrorHandler(&ll->ev,"1. Arg: %s is not a bool type!",a->str);
@@ -832,19 +832,19 @@ Boolean RexLang_ErrorsInArg(RexLang* ll,Token* a){
         }
     }
     if(a->tt==TOKEN_NUMBER){
-        if(Number_Parse(a->str) == NUMBER_PARSE_ERROR){
+        if(a->v_i64 == NUMBER_PARSE_ERROR){
             Compiler_ErrorHandler(&ll->ev,"Errors -> number %s is invalid!",a->str);
             return 1;
         }
     }
     if(a->tt==TOKEN_FLOAT){
-        if(Double_Parse(a->str,1) == DOUBLE_PARSE_ERROR){
+        if(a->v_f64 == DOUBLE_PARSE_ERROR){
             Compiler_ErrorHandler(&ll->ev,"Errors -> float %s is invalid!",a->str);
             return 1;
         }
     }
     if(a->tt==TOKEN_REXLANG_BOOLEAN){
-        if(Boolean_Parse(a->str) == BOOL_PARSE_ERROR){
+        if(a->v_b1 == BOOL_PARSE_ERROR){
             Compiler_ErrorHandler(&ll->ev,"Errors -> bool %s is invalid!",a->str);
             return 1;
         }
@@ -916,10 +916,13 @@ void RexLang_IntoReg(RexLang* ll,Token* a,CStr reg){
         }else{
             Compiler_ErrorHandler(&ll->ev,"IntoReg -> Error: %s is not a var!",a->str);
         }
+    }else if(a->tt==TOKEN_NUMBER){
+        Number n = a->v_i64;
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_16 "\t%s\t%d",reg,n);
     }else if(a->tt==TOKEN_FLOAT){
-        Compiler_ErrorHandler(&ll->ev,"IntoReg -> Error: %s is a float!",a->str);
+        Compiler_ErrorHandler(&ll->ev,"IntoReg -> Error: %f is a float!",a->v_f64);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
-        Boolean b = Boolean_Parse(a->str);
+        Boolean b = a->v_b1;
         RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_8 "\t%s\t%d",reg,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
         RexLang_Indentation_Appendf(ll,&ll->text,"mov\t\t%s\t0",reg);
@@ -978,10 +981,13 @@ void RexLang_AtReg(RexLang* ll,Token* a,CStr reg,CStr inst){
         }else{
             Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is not a var!",a->str);
         }
+    }else if(a->tt==TOKEN_NUMBER){
+        Number n = a->v_i64;
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%s\t%d",inst,reg,n);
     }else if(a->tt==TOKEN_FLOAT){
-        Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is a float!",a->str);
+        Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %f is a float!",a->v_f64);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
-        Boolean b = Boolean_Parse(a->str);
+        Boolean b = a->v_b1;
         RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_8 "\t\t%s\t%d",inst,reg,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
         RexLang_Indentation_Appendf(ll,&ll->text,"%s\t\t%s\t0",inst,reg);
@@ -1019,10 +1025,15 @@ void RexLang_AtRegP(RexLang* ll,Token* a,CStr reg,CStr inst,CStr xinst,CStr imm)
         }else{
             Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is not a var!",a->str);
         }
+    }else if(a->tt==TOKEN_NUMBER){
+        Number n = a->v_i64;
+        RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_16 "\t\t%s\t%d",RexLang_REG_D,n);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%s\t%s",xinst,RexLang_REG_D,imm);
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%s\t%d",inst,reg,RexLang_REG_D);
     }else if(a->tt==TOKEN_FLOAT){
-        Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is a float!",a->str);
+        Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %f is a float!",a->v_f64);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
-        Boolean b = Boolean_Parse(a->str);
+        Boolean b = a->v_b1;
         RexLang_Indentation_Appendf(ll,&ll->text,"mov" VM16_POST_ARCH_16 "\t\t%s\t%d",RexLang_REG_D,b);
         RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%s\t%s",xinst,RexLang_REG_D,imm);
         RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_8 "\t\t%s\t%d",inst,reg,RexLang_REG_D);
@@ -1085,10 +1096,13 @@ void RexLang_AtRegSingle(RexLang* ll,Token* a,CStr inst){
         }else{
             Compiler_ErrorHandler(&ll->ev,"AtRegSingle -> Error: %s is not a var!",a->str);
         }
+    }else if(a->tt==TOKEN_NUMBER){
+        Number n = a->v_i64;
+        RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_16 "\t\t%d",inst,n);
     }else if(a->tt==TOKEN_FLOAT){
-        Compiler_ErrorHandler(&ll->ev,"AtRegSingle -> Error: %s is a float!",a->str);
+        Compiler_ErrorHandler(&ll->ev,"AtRegSingle -> Error: %f is a float!",a->v_f64);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
-        Boolean b = Boolean_Parse(a->str);
+        Boolean b = a->v_b1;
         RexLang_Indentation_Appendf(ll,&ll->text,"%s" VM16_POST_ARCH_8 "\t\t%d",inst,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
         RexLang_Indentation_Appendf(ll,&ll->text,"%s 0",inst);
@@ -1154,10 +1168,13 @@ void RexLang_CmpAtReg(RexLang* ll,Token* a,CStr reg){
         }else{
             Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is not a var!",a->str);
         }
+    }else if(a->tt==TOKEN_NUMBER){
+        Number n = a->v_i64;
+        RexLang_Indentation_Appendf(ll,&ll->text,"cmp" VM16_POST_ARCH_16 "\t\t%s\t%d",reg,n);
     }else if(a->tt==TOKEN_FLOAT){
-        Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %s is a float!",a->str);
+        Compiler_ErrorHandler(&ll->ev,"AtReg -> Error: %f is a float!",a->v_f64);
     }else if(a->tt==TOKEN_REXLANG_BOOLEAN){
-        Boolean b = Boolean_Parse(a->str);
+        Boolean b = a->v_b1;
         RexLang_Indentation_Appendf(ll,&ll->text,"cmp" VM16_POST_ARCH_8 "\t\t%s\t%d",reg,b);
     }else if(a->tt==TOKEN_REXLANG_NULL){
         RexLang_Indentation_Appendf(ll,&ll->text,"cmp\t\t%s\t0",reg);
@@ -1180,10 +1197,12 @@ Token RexLang_ExecuteAss(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,C
     if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
 
     if(b->tt==TOKEN_NUMBER){
-        RexLang_AtSet(ll,a,b->str,instname);
+        CStr nstr = Number_Get(b->v_i64);
+        RexLang_AtSet(ll,a,nstr,instname);
+        CStr_Free(&nstr);
         return Token_Cpy(a);
     }else if(b->tt==TOKEN_FLOAT){
-        Compiler_ErrorHandler(&ll->ev,"ExecuteAss -> Error: %s is a float!",b->str);
+        Compiler_ErrorHandler(&ll->ev,"ExecuteAss -> Error: %f is a float!",b->v_f64);
         return Token_Null();
     }else if(b->tt==TOKEN_REXLANG_NULL){
         RexLang_AtSet(ll,a,"0",instname);
@@ -1216,8 +1235,7 @@ Token RexLang_Execute(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CStr
     if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
 
     if(a->tt==TOKEN_NUMBER && b->tt==TOKEN_NUMBER){
-        char* resstr = Number_Get(inst(Number_Parse(a->str),Number_Parse(b->str)));
-        return Token_Move(TOKEN_NUMBER,resstr);
+        return Token_New_I64(TOKEN_NUMBER,inst(a->v_i64,b->v_i64));
     }else{
         CStr typename_a = RexLang_VariableType(ll,a);
 
@@ -1245,8 +1263,7 @@ Token RexLang_ExecuteP(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CSt
     if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
 
     if(a->tt==TOKEN_NUMBER && b->tt==TOKEN_NUMBER){
-        char* resstr = Number_Get(inst(Number_Parse(a->str),xinst(Number_Parse(b->str),Number_Parse(imm))));
-        return Token_Move(TOKEN_NUMBER,resstr);
+        return Token_New_I64(TOKEN_NUMBER,inst(a->v_i64,xinst(b->v_i64,Number_Parse(imm))));
     }else{
         CStr typename_a = RexLang_VariableType(ll,a);
 
@@ -1264,8 +1281,8 @@ Token RexLang_ExecuteP(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CSt
         RexLang_IntoReg(ll,a,RexLang_REG_A);
         
         if(b->tt==TOKEN_NUMBER){
-            Number n = xinst(Number_Parse(b->str),Number_Parse(imm));
-            Token tinst = Token_Move(TOKEN_NUMBER,Number_Get(n));
+            Number n = xinst(b->v_i64,Number_Parse(imm));
+            Token tinst = Token_New_I64(TOKEN_NUMBER,n);
             RexLang_AtReg(ll,&tinst,RexLang_REG_A,instname);
             Token_Free(&tinst);
         }else{
@@ -1283,8 +1300,7 @@ Token RexLang_ExecuteA(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,CSt
     if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
 
     if(a->tt==TOKEN_NUMBER && b->tt==TOKEN_NUMBER){
-        char* resstr = Number_Get(inst(Number_Parse(a->str),Number_Parse(b->str)));
-        return Token_Move(TOKEN_NUMBER,resstr);
+        return Token_New_I64(TOKEN_NUMBER,inst(a->v_i64,b->v_i64));
     }else{
         if(b->tt==TOKEN_NUMBER){
             CStr typename_a = RexLang_VariableType(ll,a);
@@ -1322,8 +1338,7 @@ Token RexLang_ExecuteSingle(RexLang* ll,Token* a,Token* op,CStr instname,CStr in
     if(RexLang_ErrorsInArg(ll,a)) return Token_Null();
 
     if(a->tt==TOKEN_NUMBER){
-        char* resstr = Number_Get(inst(Number_Parse(a->str)));
-        return Token_Move(TOKEN_NUMBER,resstr);
+        return Token_New_I64(TOKEN_NUMBER,inst(a->v_i64));
     }else{
         CStr typename_a = RexLang_VariableType(ll,a);
         int realsize_a = RexLang_TypeRealSize(ll,a);
@@ -1347,8 +1362,7 @@ Token RexLang_ExecuteJmp(RexLang* ll,Token* a,Token* b,Token* op,CStr instname,C
     if(RexLang_ErrorsInArg(ll,b)) return Token_Null();
 
     if(a->tt==TOKEN_NUMBER && b->tt==TOKEN_NUMBER){
-        char* resstr = Boolean_Get(inst(Number_Parse(a->str),Number_Parse(b->str)));
-        return Token_Move(TOKEN_REXLANG_BOOLEAN,resstr);
+        return Token_New_I64(TOKEN_NUMBER,inst(a->v_i64,b->v_i64));
     }else{
         int realsize_a = RexLang_TypeRealSize(ll,a);
         int realsize_b = RexLang_TypeRealSize(ll,b);

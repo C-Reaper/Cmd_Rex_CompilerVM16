@@ -20,15 +20,19 @@ Boolean RexLang_Compress_pointer(RexLang* ll,TokenMap* tm);
 Boolean RexLang_Compress_defines(RexLang* ll,TokenMap* tm){
     for(int i = 0;i<tm->size;i++){
         Token* t = (Token*)Vector_Get(tm,i);
+
         if(t->tt==TOKEN_STRING){
             for(int j = 0;j<ll->defines.size;j++){
                 Define* d = (Define*)CVector_Get(&ll->defines,j);
+
                 if(CStr_Cmp(d->name,t->str)){
                     Token_Free(t);
                     Vector_Remove(tm,i);
 
                     TokenMap tokm = TokenMap_Cpy(&d->content);
                     Vector_AddCount(tm,tokm.Memory,tokm.size,i);
+                    i--;
+                    break;
                 }
             }
         }
@@ -978,7 +982,7 @@ Boolean RexLang_Decl(RexLang* ll,TokenMap* tm){
                     
                     Number size = 0;
                     if(stok->tt == TOKEN_NUMBER){
-                        size = Number_Parse(stok->str);
+                        size = stok->v_i64;
 
                         if(size == NUMBER_PARSE_ERROR){
                             Compiler_ErrorHandler(&ll->ev,"decl: number: \'%s\' is not valid!",stok->str);
@@ -1084,8 +1088,8 @@ Boolean RexLang_Assembly(RexLang* ll,TokenMap* tm){
         Token* t = (Token*)Vector_Get(tm,i);
 
         if(t->tt==TOKEN_CONSTSTRING_DOUBLE) String_Append(&ll->text,t->str);
-        else if(t->tt==TOKEN_NUMBER)        String_Append(&ll->text,t->str);
-        else if(t->tt==TOKEN_FLOAT)         String_Append(&ll->text,t->str);
+        else if(t->tt==TOKEN_NUMBER)        String_AppendNumber(&ll->text,t->v_i64);
+        else if(t->tt==TOKEN_FLOAT)         String_AppendDouble(&ll->text,t->v_f64);
         else if(t->tt==TOKEN_STRING){
             String_Append(&ll->text,RexLang_RT[pulled]);
             pulled--;

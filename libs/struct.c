@@ -147,7 +147,7 @@ Token Struct_Null_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     String ret = String_New();
 
     if(a->tt==TOKEN_NUMBER){
-        String_AppendNumber(&ret,Number_Parse(a->str));
+        String_AppendNumber(&ret,a->v_i64);
     }else{
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
@@ -180,9 +180,9 @@ Token Struct_Handler_Size(RexLang* ll,Token* op,Vector* args){
             Member* m = (Member*)Vector_Get(&t->related,i);
             size += RexLang_Size(ll,m->type);
         }
-        return Token_Move(TOKEN_NUMBER,Number_Get(size));
+        return Token_New_I64(TOKEN_NUMBER,(size));
     }
-    return Token_Move(TOKEN_NUMBER,Number_Get(0));
+    return Token_New_I64(TOKEN_NUMBER,(0));
 }
 
 void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vector<CStr>

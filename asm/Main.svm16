@@ -706,7 +706,7 @@ f.cstr.cmp:
     cmp1		r0	1
     jnz		l.1_IF2_3
     l.0_IF2_3:
-    mov1	r0	0
+    mov1	r0	4294967264
     mov		r3	sp
     add		r3	10
     ld1		r2	r3
@@ -837,7 +837,7 @@ f.cstr.cmp:
     cmp1		r0	1
     jnz		l.1_IF4_0
     l.0_IF4_0:
-    mov1	r0	0
+    mov1	r0	4294967280
     mov		r3	sp
     add		r3	12
     ld1		r2	r3
@@ -857,7 +857,7 @@ f.cstr.cmp:
     jmp		l.0_FOR3_0
     l.1_FOR3_0:
     add		sp	2
-    mov1	r0	1
+    mov1	r0	4294967248
     mov		r3	sp
     add		r3	10
     ld1		r2	r3
@@ -3054,7 +3054,7 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	0x0000
+    mov2		r2	0
     st2		r3	r2
     call	f.gpu_clear
     add		sp	2
@@ -3181,7 +3181,7 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	0xFFFF
+    mov2		r2	65535
     st2		r3	r2
     call	f.gpu_cstr
     add		sp	2
@@ -3247,7 +3247,7 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	0xFFFF
+    mov2		r2	65535
     st2		r3	r2
     call	f.gpu_circle
     add		sp	2
@@ -3330,7 +3330,7 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	0xF000
+    mov2		r2	61440
     st2		r3	r2
     call	f.gpu_rect
     add		sp	2
@@ -3414,7 +3414,7 @@ f.main:
     mov		r3	sp
     add		r3	0
     ld2		r2	r3
-    mov2		r2	0x000F
+    mov2		r2	15
     st2		r3	r2
     call	f.gpu_rect
     add		sp	2

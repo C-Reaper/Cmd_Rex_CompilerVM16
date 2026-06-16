@@ -10,7 +10,9 @@ Token Pointer_Pointer_Handler_Ass(RexLang* ll,Token* op,Vector* args){
     //printf("[Pointer]: ASS: %s = %s\n",a->str,b->str);
 
     if(b->tt==TOKEN_NUMBER){
-        RexLang_IntoSet(ll,a,b->str);
+        CStr nstr = Number_Get(b->v_i64);
+        RexLang_IntoSet(ll,a,nstr);
+        CStr_Free(&nstr);
     }else if(b->tt==TOKEN_CONSTSTRING_DOUBLE){
         CStr name = RexLang_BuildConstStr(ll,b->str);
         RexLang_IntoSet(ll,a,name);
@@ -248,7 +250,7 @@ Token Pointer_Null_Handler_Cast(RexLang* ll,Token* op,Vector* args){
     String ret = String_New();
 
     if(a->tt==TOKEN_NUMBER){
-        String_AppendNumber(&ret,Number_Parse(a->str));
+        String_AppendNumber(&ret,a->v_i64);
     }else{
         Variable* v = Scope_FindVariable(&ll->ev.sc,a->str);
         if(v){
@@ -278,7 +280,7 @@ Token Pointer_Handler_Cast(RexLang* ll,Token* op,Vector* args){
 Token Pointer_Handler_Size(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     //printf("[Pointer]: SIZE: %s\n",a->str);
-    return Token_Move(TOKEN_NUMBER,Number_Get(POINTER_SIZE));
+    return Token_New_I64(TOKEN_NUMBER,(POINTER_SIZE));
 }
 
 void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vector<CStr>

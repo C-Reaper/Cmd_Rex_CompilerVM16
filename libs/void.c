@@ -32,7 +32,7 @@ Token Void_Handler_Cast(RexLang* ll,Token* op,Vector* args){
 Token Void_Handler_Size(RexLang* ll,Token* op,Vector* args){
     Token* a = (Token*)Vector_Get(args,0);
     //printf("[Void]: SIZE: %s\n",a->str);
-    return Token_Move(TOKEN_NUMBER,Number_Get(VOID_SIZE));
+    return Token_New_I64(TOKEN_NUMBER,(VOID_SIZE));
 }
 
 void Ex_Packer(ExternFunctionMap* Extern_Functions,Vector* funcs,Scope* s){//Vector<CStr>
